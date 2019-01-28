@@ -1,0 +1,69 @@
+<xml>
+<head>
+<title>Using Network Sockets, ClanLib API overview</title>
+</head>
+<body>
+
+<h2>Abstract: </h2>
+
+<p>An overview covering how to use sockets directly in ClanLib </p>
+
+<p>The socket interface in ClanLib provides a way to directly access the sockets so you 
+don't have to use CL_NetworkSession & friends.</p>
+
+<h3> Initializing the Network </h3>
+
+<p> In order to use sockets we must first initialize the network. <p>
+
+<code>
+#include <ClanLib/application.h>
+#include <ClanLib/core.h>
+#include <ClanLib/network.h>
+#include <ClanLib/Network/socket.h>
+
+class MyNetApp : public CL_ClanApplication
+{
+public:
+	virtual int main(int argc, char **argv)
+	{
+		CL_SetupCore::init();
+		CL_SetupNetwork::init();
+
+		CL_Socket *sock;
+		CL_IPAddress ip;
+	}
+
+}
+</code>
+
+<p>This is just the basic outline of a program.  We need to assign sock a Socket type.  It can be either tcp or udp.  To do so we use this code.</p>
+
+<code>
+...
+CL_Socket *sock = new CL_Socket(CL_Socket::tcp);
+...
+</code>
+
+<p>Now a port must be assigned to CL_IPAddress.  A host may also be specified, but we won't go into that right now.  Please note, port numbers <1024 are considered priviledged.  Which means that in certain environments(eg. Unix, Windows NT) they cannot be used with Administrator/Root access.</p>
+
+<code>
+...
+CL_IPAddress ip;
+ip.set_port(3490);
+...
+</code>
+
+<p>Next, we must setup the bindings for the socket.  The bindings will signal other parts of your program when an event occurs.</p>
+
+<code>
+...
+sock->bind(ip);
+sock->sig_read_triggered().connect(this, &MyNetApp::conn);
+sock->sig_write_triggered().connect(this, &MyNetApp::conn);
+sock->sig_exception_triggered().connect(this, &MyNetApp::conn);
+...
+
+void MyNetApp::conn() { cout << "Hello World" << endl; }
+
+</body>
+</xml>

@@ -1,0 +1,43 @@
+prefix=@prefix@/share/
+
+HTML_PREFIX = $(prefix)/doc/ClanLib-docs-@version_minor@/Documentation
+
+all: faq
+	Utilities/webbuilder.pl documentation.theme index.xml
+#	cd Reference; make man
+	cd Reference; make
+	cd Overview; make
+#	cd Tutorial; make
+
+faq:
+	perl FAQ.theme
+
+install:
+	@install -d $(HTML_PREFIX)
+	@install -d $(HTML_PREFIX)/Images
+	@install -m 0644 Images/*.gif $(HTML_PREFIX)/Images
+	@install -m 0644 *.html $(HTML_PREFIX)
+	
+#	cd Reference; make man_install
+	cd Reference; make html_install
+	cd Overview; make install
+#	cd Tutorial; make install
+
+publish : all
+	Utilities/transform.sh Reference/html
+	Utilities/transform.sh Overview/
+	mv Reference/html Reference/php
+
+distclean:
+	cd Reference; make distclean
+	cd Overview; make distclean
+	cd Tutorial; make distclean
+	rm -f Utilities/webbuilder.pl
+	rm -rf Reference/php
+	rm -f Overview/*.php
+	rm Makefile
+
+clean:
+	cd Reference; make clean
+	cd Overview; make clean
+	cd Tutorial; make clean

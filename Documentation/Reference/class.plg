@@ -1,0 +1,488 @@
+use strict;
+use POSIX qw(strftime); 
+sub plugin {
+  my $global=shift;
+  print "Generation class documentation\n";
+  print_class_index($global);
+  print_classes($global);
+  print "Done with classes\n";
+}
+
+sub print_classes {
+  my $space=shift;
+  foreach (sort byfullname $space->all()) {
+    next if (!$_->is_class());
+    print_class($_);
+  }
+}
+
+# Remember to set $new_line_flag = 0 before using this function
+my $new_line_flag = 0;
+my @classes;
+sub print_description {
+  my $mydesc=shift;
+  foreach (@classes) {
+    my $item = $_;
+    my $name = $$item{fullname};
+    # Find comment cross reference
+    my $mylink=$item->href($$item{fullname});
+    $mydesc=~s/([. ,()])${name}([. ,()])/${1}${mylink}${2}/g;
+    $mydesc=~s/([. ,()])${name}$/${1}${mylink}/g;
+    $mydesc=~s/^${name}([. ,()])/${mylink}${1}/g;
+  }
+  # Check if new lines are required
+  if ($mydesc=~/&lt;p&gt;/) {
+    $new_line_flag = 1;
+    $mydesc=~s/&lt;p&gt;//g;
+  }
+  if ($mydesc=~/&lt;\/p&gt;/) {
+    $new_line_flag = 0;
+    $mydesc=~s/&lt;\/p&gt;//g;
+  }
+  if ($new_line_flag eq 0) {
+    print FILE "$mydesc<br>";
+  }else {
+    print FILE "$mydesc";
+  }
+
+}
+
+sub print_html_header {
+  my $html_name=shift;
+  my $index_number=shift;
+  my $colour=shift;
+  print FILE '
+<html>
+<head><title>ClanLib Reference: ', $html_name, '</title></head>
+<body text=black link=blue vlink=#800080 bgcolor=white topmargin=0 leftmargin=0>
+<table border=0 cellspacing=0 cellpadding=0 width=100%><tr><td><img border=0 src="../images/eyeheader-main-', $colour, '-a.gif" alt="ClanSoft logo" width=525 height=96></td></tr>
+<tr bgcolor=#dadada><td align=left valign=top><img border=0 src="../images/eyeheader-main-', $colour, '-b.gif" alt="ClanSoft logo" width=190 height=14></td><td align=right valign=top><img border=0 src="../images/clanlib_light.gif" width=42 height=14></td></tr></table>
+<table align=center border=0 cellspacing=10> <tr>
+';
+
+  if ($index_number eq 1)
+  {
+    print FILE "<td>Entire Class Index</td>\n";
+  }else
+  {
+    print FILE "<td><a href=\"entire_class_index.html\">Entire Class Index</a></td>\n";
+  }
+
+  if ($index_number eq 2)
+  {
+    print FILE "<td>Main Class Index</td>\n";
+  }else
+  {
+    print FILE "<td><a href=\"class_index.html\">Main Class Index</a></td>\n";
+  }
+
+  if ($index_number eq 3)
+  {
+    print FILE "<td>Cross Index</td>\n";
+  }else
+  {
+    print FILE "<td><a href=\"cross_index.html\">Cross Index</a></td>\n";
+  }
+
+  if ($index_number eq 4)
+  {
+    print FILE "<td>Global Index</td>\n";
+  }else
+  {
+    print FILE "<td><a href=\"global_index.html\">Global Index</a></td>\n";
+  }
+  print FILE "</table>";
+}
+
+my $last_group;
+my $last_section;
+my $file_open_flag;
+sub print_class_index {
+  my $space=shift;
+  my $clan_group;
+  my $clan_section;
+  my $id;
+  my %hash;
+  my $time_string = strftime "%e %b %Y", gmtime;
+
+  # Get the class in order of Group / Section / Name
+  $id = 0;
+  foreach (all $space) {
+    if ($_->is_class())
+    {
+      my $cname = $_->name;
+      $clan_group = "";
+      $clan_section = "";
+ 
+      foreach (split("\n",$$_{unique_string})) {
+        /^!.(.*)$/;
+        my $workbuffer;
+        $workbuffer=$1;
+        if (substr($workbuffer,0,4) eq "clan")
+        {
+          $workbuffer = substr($workbuffer,4);
+          ($clan_group, $clan_section)=split(/=/, $workbuffer);
+          $clan_section=~s/\"//g;
+        }
+      }
+      my $name = "$clan_group=$clan_section=$cname=$id\n";
+      $hash{$name}=[] if (!$hash{$name});
+    }
+    $id = $id + 1; 
+  }
+  my @entire_list = $space->all();
+  
+  foreach (sort keys %hash)
+  {
+    my $cname;
+    ($clan_group, $clan_section, $cname, $id) = split(/=/, $_);
+    push(@classes, $entire_list[$id]); 
+
+  }
+
+  open(FILE,">html/entire_class_index.html");
+  print_html_header("Entire Class Index", 1, "green");
+  print FILE "<h1 align=center>Entire Class Index</h1>\n<ul type=disc>\n";
+  $last_group="E R R O R";
+  $last_section="E R R O R";
+  foreach (@classes) {
+    print_class_full_index($_);
+  }
+  print FILE "</ul>Documentation Created : $time_string\n</body></html>";
+  close(FILE);
+
+  open(FILE,">html/class_index.html");
+  print_html_header("Main Index", 2, "orange");
+  print FILE "<h1 align=center>Main Index</h1>\n<ul type=disc>\n";
+  $last_group="E R R O R";
+  $last_section="E R R O R";
+  foreach (@classes) {
+    print_class_main_index($_);
+  }
+  print FILE "</ul>Documentation Created : $time_string\n</body></html>";
+  close(FILE);
+
+  $last_group="E R R O R";
+  $last_section="E R R O R";
+  $file_open_flag = 0;
+  foreach (@classes) {
+    print_class_section_index($_);
+  }
+
+  # Close the old file
+  if ($file_open_flag ne 0)
+  {
+    $file_open_flag = 0;
+    print FILE "</ul></body></html>";
+    close(FILE);
+  }
+
+}
+
+sub print_class_section_index {
+  my $item=shift;
+
+  my $clan_group="";
+  my $clan_section="";
+  my $workbuffer;
+
+  foreach (split("\n",$$_{unique_string})) {
+    /^!.(.*)$/;
+    $workbuffer=$1;
+    if (substr($workbuffer,0,4) eq "clan")
+    {
+      $workbuffer = substr($workbuffer,4);
+      ($clan_group, $clan_section)=split(/=/, $workbuffer);
+      $clan_section=~s/\"//g;
+    }
+  } 
+  # Start of a new group
+  if ($clan_group ne $last_group)
+  {
+    # Close the old file
+    if ($file_open_flag ne 0)
+    {
+      $file_open_flag = 0;
+      print FILE "</ul></body></html>";
+      close(FILE);
+    }
+    # Open a new file
+    open(FILE,">html/${clan_group}_index.html");
+    print_html_header("$clan_group Index", 0, "orange");
+    print FILE "<h1 align=center>$clan_group Index</h1>\n<ul type=disc>\n";
+    $file_open_flag = 1;
+    $last_group = $clan_group;
+    $last_section = "E R R O R";
+  }
+
+  # Start of a new section
+  if ($clan_section ne $last_section )
+  {
+    print FILE '<hr size="1" width="70%" align="left" noshade="noshade">';
+    print FILE "<h3>$clan_group - $clan_section </h3>";
+    $last_section = $clan_section;
+  }
+  print FILE "<li><b>",$item->href($$item{fullname}),"</b>\n";
+}
+
+sub print_class_main_index {
+  my $item=shift;
+
+  my $clan_group="";
+  my $clan_section="";
+  my $workbuffer;
+  my $comment_found_flag = 0;
+
+  foreach (split("\n",$$_{unique_string})) {
+    /^!.(.*)$/;
+    $workbuffer=$1;
+    if (substr($workbuffer,0,4) eq "clan")
+    {
+      $workbuffer = substr($workbuffer,4);
+      ($clan_group, $clan_section)=split(/=/, $workbuffer);
+    }
+  } 
+  if ($clan_group ne $last_group)
+  {
+
+    print FILE '<hr size="1" width="70%" align="left" noshade="noshade">';
+    print FILE "<li><b><a href=\"${clan_group}_index.html\"> $clan_group </a> </b><br>\n";
+    $last_group = $clan_group;
+
+    $new_line_flag = 0;
+    foreach (split("\n", $file_global_string))
+    {
+      /(.*)$/;
+      my $mydesc = $1;
+
+      # A new comment found - it will always need processing
+      if (substr($mydesc,0, 2) eq "! ")
+      {
+        $comment_found_flag = 0;
+      }
+
+      if ($comment_found_flag eq 0)
+      {
+        # Find the correct comment
+        if ($mydesc eq "! ${clan_group}")
+        {
+          $comment_found_flag = 1;
+        }
+      }else
+      {
+        $mydesc = substr($mydesc, 1);
+        print_description($mydesc);
+      }
+    }
+  }
+}
+
+
+sub print_class_full_index {
+  my $item=shift;
+
+  my $clan_group="";
+  my $clan_section="";
+  my $workbuffer;
+ 
+  foreach (split("\n",$$_{unique_string})) {
+    /^!.(.*)$/;
+    $workbuffer=$1;
+    if (substr($workbuffer,0,4) eq "clan")
+    {
+      $workbuffer = substr($workbuffer,4);
+      ($clan_group, $clan_section)=split(/=/, $workbuffer);
+      $clan_section=~s/\"//g;
+    }
+  } 
+  if (($clan_group ne $last_group) || ($clan_section ne $last_section ))
+  {
+    print FILE '<hr size="1" width="70%" align="left" noshade="noshade">';
+    print FILE "<h3>$clan_group - $clan_section </h3>";
+    $last_group = $clan_group;
+    $last_section = $clan_section;
+  }
+
+  print FILE "<li><b>",$item->href($$item{fullname}),"</b>\n";
+}
+    
+sub print_class {
+  $_=shift;
+
+  # Replace :: with __ for filenames
+  my $dummyfilename = $$_{fullname};
+  $dummyfilename=~s/::/__/g;
+
+  print "Generating $$_{fullname}\n";
+  open(FILE,">html/$dummyfilename.html");
+
+  print_html_header("$$_{fullname}", 0, "purple");
+  print FILE "<h1 align=center>Class $$_{fullname}</h1><p>\n";
+  my $workbuffer="";
+  my $clan_group="";
+  my $clan_section="";
+  my $clan_header="";
+  foreach (split("\n",$$_{unique_string})) {
+    /^!.(.*)$/;
+    $workbuffer=$1;
+    if (substr($workbuffer,0, 7) eq "header=")
+    {
+      $clan_header = substr($workbuffer, 7);
+    }
+    if (substr($workbuffer,0,4) eq "clan")
+    {
+      $workbuffer = substr($workbuffer,4);
+      ($clan_group, $clan_section)=split(/=/, $workbuffer);
+      $clan_section=~s/\"//g;
+    }
+  }
+  
+  print FILE "<b>$$_{short}</b><br>\n";
+
+  # Print containing space
+  my $space=$$_{space};
+  my $tempname = $space->href($$space{fullname});
+  # Fix to change global to global_index
+  $tempname=~s/global.html/global_index.html/g;
+  print FILE "Contained in: ",$tempname,"<br>\n";
+
+  # Print base classes
+  print FILE "Derived from:\n";
+  if ($_->parents()) {
+    foreach (sort byname parents $_) {
+      print FILE $_->href("$$_{fullname}"),"\n";
+    }
+  }
+  else {print FILE "<i>none</i>\n"; }
+  print FILE "<br>\n";
+
+  # Print derived classes
+  print FILE "Derived by:\n";
+  if ($_->children()) {
+    foreach (sort byname children $_) {
+
+      # Replace :: with __ for filenames
+      $dummyfilename = $$_{fullname};
+      $dummyfilename=~s/::/__/g;
+
+      print FILE "<a href=\"$dummyfilename.html\">$$_{fullname}</a>\n";
+      #print FILE "<a href=\"$$_{fullname}.html\">$$_{fullname}</a>\n";
+    }
+  }
+  else { print FILE "<i>none</i>\n"; }
+
+  print FILE "<br>Group: $clan_group ($clan_section)\n";
+
+  print FILE "<p>\n";
+  print FILE "#include \&lt;ClanLib/$clan_header\&gt;\n";
+  print FILE "<p>\n";
+
+  print FILE "<hr noshade>\n";
+  if ($_->functions()) {
+    my $access;
+    print FILE "<table border=0>\n";
+ 
+    my $current_function_type = "";
+ 
+    foreach $access ($Enum::PUBLIC, $Enum::PROTECTED, $Enum::PRIVATE) {
+
+      my @group;
+      foreach ($_->get_by_access($access)) {
+        push(@group,$_) if ($_->is_function());
+      }
+      next if (!@group);
+
+
+      print FILE "<tr><td colspan=3><h3>$Enum::ACCESS_NAMES[$access] function member index:</h3></td>\n";
+      foreach  (@group) {
+# See if a different function type required (using the "! c=" identifier)
+        my $this_name="";
+        my $this_value="";
+        foreach (split("\n",$$_{unique_string})) {
+          /(.*)$/;
+          ($this_name, $this_value)=split(/=/, $1);
+          if ($this_name eq "! c")
+          {
+            if ($this_value ne $current_function_type)
+            {
+              $current_function_type = $this_value;
+              print FILE "<tr valign=top><td align=left><h3>$this_value</h3></td>\n";
+            }
+          }
+        }
+	my @decl=$_->html_decl();
+        print FILE "<tr valign=top><td align=right>$decl[0]</td>";
+        print FILE "<td align=right>$decl[1]</td>";
+        print FILE "<td>$decl[2]</td>\n";
+      }
+      print FILE "<tr><td>&nbsp;</td>";
+    }
+    print FILE "</table>\n";
+  }
+
+  print FILE "<hr noshade>\n";
+
+  print FILE "<h2>Description:</h2>\n";
+
+  $new_line_flag = 0;
+  foreach (split("\n",$$_{long})) {
+    /(.*)$/;
+    print_description($1);
+  }
+  print FILE "<p>\n";
+ 
+  if ($_->functions()) {
+    print FILE "<hr noshade>\n";
+    print FILE "<h2>Function Member Descriptions:</h2>\n";
+    foreach (sort byname $_->functions()) {
+      my $impl;
+
+      next if !$$_{short};
+      print FILE "<a name=\"$$_{refnum}\"><font size=+1><b>$$_{fullname}</b></font></a> - ";
+
+      $new_line_flag = 0;
+      foreach (split("\n",$$_{short})) {
+        /(.*)$/;
+        print_description($1);
+      }
+
+      print FILE $_->html_decl(); 
+     
+      #group out _impl functions with the signal description
+      $impl=$$_{space}->lookup("$$_{name}_impl");
+      print FILE "<br>",$impl->html_decl() if ($impl);
+
+      if ($$_{long}) {
+         my $longhtmlstring = $$_{long};
+         $longhtmlstring=~s/\n/<br>/g; 
+         print FILE "<br><blockquote>$longhtmlstring</blockquote>\n";
+      }
+      print FILE '<hr size="1" width="70%" align="left" noshade="noshade">';
+      print FILE "<br><br>\n";
+    }
+  }
+
+  if ($_->variables()) {
+    print FILE "<hr noshade>\n";
+    print FILE "<h2>Variable Member Descriptions:</h2>\n";
+    foreach (sort byname $_->variables()) {
+      my $impl;
+
+      next if !$$_{short};
+      print FILE "<a name=\"$$_{refnum}\"><font size=+1><b>$$_{fullname}</b></font></a> - ";
+      print FILE "$$_{short}<br>\n";
+
+      print FILE $_->html_decl();
+      if ($$_{long}) {
+         print FILE "<br><blockquote>$$_{long}</blockquote>\n";
+      }
+      print FILE '<hr size="1" width="70%" align="left" noshade="noshade">';
+      print FILE "<br>\n";
+    }
+  }
+   
+  print FILE "<hr noshade>\n";
+  print FILE "</body>\n";
+  print FILE "</html>\n";
+  close(FILE);
+}

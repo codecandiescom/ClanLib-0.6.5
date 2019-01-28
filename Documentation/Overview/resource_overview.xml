@@ -1,0 +1,374 @@
+<xml>
+<head>
+<title>Resource API Overview</title>
+</head>
+<body>
+
+<h2>Abstract:</h2>
+
+<p>This document explains the fundamentals of resource management, and the 
+rationale behind it. It explains how the resource system can be extended 
+with new user defined resource types, and how the predefined basic ClanLib
+resource types can be used to instantiate ClanLib display and surface objects.</p>
+
+<h3>Resources in ClanLib</h3>
+<p>Resources are a fundamental aspect of any game. The graphics in the game,
+consists of sprites, and the sounds in the game typically consists of wave-samples
+or similar. Other data used in games, could be the data defining a "level" in 
+a game, or the dialogue used in some scene in the game. As a matter of fact,
+anything except the actual game code in the game, can be viewed as resources.</p>
+
+<p>We would like resources in a game to be separated from the game as much as possible.
+For instance, we don't want to change code, because we change the filename of some
+sprite graphics file, and we certainly don't want to update source code, if we change
+the dimensions or any similar aspect of a resource either. We wan't to have 
+flexible control of the resources initialization, separated from the game code. For
+instance we want to be able to specify whether a sample loops, or set it's volume 
+separately from the source code. We want to have as great resource flexibility as 
+possible while developing the game. For instance we don't want to rebuild some resource
+data file each time we make a change, and when we make a release of the game, we don't 
+want to have to change anything in the game code. Finally we would like our resources
+to be location transparent. If we have some netgame server that includes a level 
+unknown to a joining client, we want that level to be transferred to the client game
+location transparently, as if the resource resided locally on that client.</p>
+
+<p>To design a resource system, that provides an adequate solution to these problems,
+we need a level of abstraction between physical resource location/loading, and resource 
+naming in the actual game code. This is where the resource manager in ClanLib comes in.
+The resource manager, <codelink>CL_ResourceManager</codelink> provides this level of abstraction, by
+presenting a uniform resource interface to ClanLib applications. The resource managers
+main responsibility is to parse a resource definition file, and load the resources
+using the proper resource loader, when requested. This of course demands a little
+explanation. A resource definition file (typically using a .scr extension), defines
+all the resources that a given game uses. All entries in the resource definition
+file are mappings from physical file locations, to resource id's. This looks something
+like this:
+
+<code>
+res_id = some_resource_file (type=some_resource_type);
+</code>
+
+<p>The above code is translated to mean, that when the game requests resource 'res_id',
+the resource loaded by the resource loader associated with 'some_resource_type' is
+returned.</p> 
+
+<h3>Resource types</h3>
+<p>ClanLib defines a resource, simply as something that has a resource type, and which
+can be loaded and unloaded. ClanLib defines a range of built in resource types:</p>
+<ul>
+<li>surface</li>
+<li>sample</li>
+<li>font</li>
+<li>string</li>
+<li>integer</li>
+<li>boolean</li>
+<li>raw</li>
+</ul>
+<p>The purpose of these resource types should be self explanatory. Each resource type has
+several configuration options associated with it. All options in the resource definition
+file must be enterered within the parantheses following the physical resource location,
+and must be separated by commas. A later part of this overview will describe the options
+associated with each resource type.</p>
+
+<h3>A resource usage example</h3>
+<p>Let us look at an example resource definition file, and see how that can be translated
+to resources usable by the ClanLib classes during runtime:</p>
+
+<code>
+res_surface = test.tga (type=surface);
+res_sample = test.wav (type=sample);
+</code>
+
+<p>As mentioned previously, this definition file is interfaced to via the 
+<codelink>CL_ResourceManager</codelink> class. The <codelink>CL_ResourceManager</codelink>
+is created using one of the following constructors:</p>
+
+<code>
+CL_ResourceManager::CL_ResourceManager(
+	const char *config_file,
+	CL_InputSourceProvider *provider = NULL,
+	bool read_directly_from_source=false,
+	bool delete_inputsource_provider=false);
+
+CL_ResourceManager::CL_ResourceManager(
+	const char *file_name,
+	const bool is_datafile);
+</code>
+
+<p>Both are variations on the same theme. Both receive as input the name of a file. If
+either 'read_directly_from_source' is false, or 'is_datafile' is true, the filename
+is assumed to be the filename of a datafile, containing both the resource definition
+file, and the resources. If not, the filename is assumed to be the name of the resource
+definition file. If the resource definition file cannot be found, or if a syntax error
+is found during parsing of the resource definition file, an exception of type 
+<codelink>CL_Error</codelink> is thrown.</p>
+
+<p>The instantiated <codelink>CL_ResourceManager</codelink> class, is in most cases 
+only used indirectly. Classes like <codelink>CL_Surface</codelink> and 
+<codelink>CL_SoundBuffer</codelink> have resource load constructors, receiving as
+argument a pointer to the instantiated resource manager, as well as a resource id
+specifying the specific resource to be loaded as data for that given object.</p>
+
+<p>When using resources, make sure you include <ClanLib/core.h></p>
+
+<p>Some example code could look like this:</p>
+<code>
+/*
+	//	my_resources.scr dump:
+	section Surfaces
+	{
+		my_surface = test.tga (type=surface);
+	}
+*/
+
+CL_ResourceManager manager(
+	"my_resources.scr", // Name of resource definition file
+	false); // This is not read from a datafile - load resource data through normal files
+
+CL_Surface my_surface("Surfaces/my_surface", &manager);
+</code>
+<p>Another example using the other resource manager constructor could look like this:</p>
+<code>
+CL_ResourceManager manager(
+	"my_resources.scr",             // Name of resource definition file
+	CL_InputSourceProvider::create_datafile_provider(
+		"my_datafile.dat"),     // The resource definition file is stored in a datafile
+	true,                           // Read resource data directly from source
+	true);                          // Delete inputsourceprovider upon destruction
+CL_Surface my_surface("Surfaces/my_surface", &manager);
+</code>
+
+<h3>Resource sections</h3>
+<p>As you may have noted in the previous section, my_resources.scr, contains 
+a 'section Surfaces' construct. 'section' is a keyword in ClanLib 
+resource definition files, and sections can be build
+up, to provide better grouping of resources. Sections can be nested inside each other,
+but a resource can be a part of only one section (as the resource name is qualified
+with the section hierachy of which it is a part (as in "Surfaces/my_surface")). The
+syntax of a resource section is as follows:</p>
+<code>
+section MySection
+{
+	section MyNestedSection
+	{
+		my_resource = resource.tga (type=surface);
+	}
+}
+</code>
+<p>'my_resource' has the following fully qualified resource_id: 
+"MySection/MyNestedSection/my_resource".</p>
+
+<p>One of the advantages of grouping is that you can load all resources in a group into memory at once.
+This allows your game to do all in-game loading at game start, instead of loading the resources as
+they are used in the game. The following code will do that:</p>
+
+<code>
+manager.load_section("MySection");
+</code>
+
+<p>When you load an entire section of resources, you will have to inform the resource manager when it
+can unload them from memory again. All the resources in clanlib are reference counted, and if you do
+not call the CL_ResourceManager::unload_section() function, your application will memory leak!</p>
+
+<h3>Custom resources</h3>
+
+<p>It is possible to add your own resource types to clanlib, or even extend the functionality of already
+existing resource types.</p>
+
+<p>The resource system uses an interface called CL_ResourceType to identify resource types in the resource
+files, and instantiate the appropiate data objects for a resource. When a resource is being loaded, the
+following happens:</p>
+
+<ul>
+<li>The resource manager parses a resource description in the resource file, and creates a CL_Resource
+object containing the description.</li>
+<li>The manager walks through a linked list of registered resource types, finding all resource types that
+aknowledges the resource description.</li>
+<li>Each resource type is asked to create and attach a resource data object (CL_ResourceData) that can
+handle the resource' data.</li
+<li>The CL_Resource object has some signals that are invoked when a resource is to be loaded, unloaded, or
+saved to a datafile. If a resource data object is interesting in reacting on this (a surface resource data
+object would load the surface into memory on a load signal), they must connect a slot to the appropiate
+signal.</li>
+<li>Each resource data object uses a identifying string that can be used to locate the object's pointer.
+A surface data object might register itself as "surface", and a call to CL_Resource.get_data("surface")
+will then return a pointer this object.</li>
+</ul>
+
+<p>This may sound a little advanced, but a small example will show how simple it can look. First
+we create out data object:</p>
+
+<code>
+resources.scr:
+our_map= some_location.map	(
+					size=100x200,
+					type=map
+				};
+
+
+
+class ResourceData_Map : public CL_ResourceData
+{
+public:
+	ResourceData_Map(CL_Resource &resource)
+	: CL_ResourceData(resource), width(0), height(0), map(NULL)
+	{
+		// Connect to the file load signal:
+		slot_load_file = resource.sig_load_file().connect(this, &ResourceData_Map::on_load_file);
+	
+		// Attach resource data object to the resource.
+		resource.attach_data("map", this);
+	}
+	
+	~ResourceData_Map()
+	{
+		delete[] map;
+	}
+	
+	void on_load_file()
+	{
+		// get the size option (100x200)
+		CL_ResourceOption &size_opt = get_resource().get_options().get_option("size");
+		
+		// get the first value of the size (100)
+		width = CL_String(size_opt.get_value(0)).get_as_int();
+		
+		// get the second value of the size (200)
+		height = CL_String(size_opt.get_value(1)).get_as_int();
+		
+		// allocate memory for the map
+		map = new char[width*height];
+
+		// open the file "some_location.map"
+		FILE *file = fopen(get_resource().get_location().c_str(), "rb");
+		fread(map, width*height, file);
+		fclose(file);
+	}
+	
+	char *map;
+	int width, height;
+	CL_Slot slot_load_file;
+};
+</code>
+
+<p>The data object attaches itself to the resource using the name 'map'. We can obtain a pointer to
+the object by using the CL_Resource::get_data() function: </p>
+
+<code>
+// open the resource file
+CL_ResourceManager resources("resources.scr", false);
+
+// get the map resource
+CL_Resource &map_resource = resources.get_resource("our_map");
+
+// get the attached Map data from the resource
+ResourceData_Map *map = (ResourceData_Map*) map_resource.get_data("map");
+</code>
+
+<p>Note that the above code will not produce a call to ResourceData_Map::on_load_file(). This will
+first happen when a call is done to CL_Resource::load(). The same thing applies with unloading; if
+you loaded an object by calling load(), you must also call unload(). The resource class reference
+counts the loading, so several objects can call load(), but only the first call will actually perform
+the load.</p>
+
+<p>When the resource manager parses the resource file, it will need to know what resource types exist,
+and how to attach data objects. In order to do this, the resource manager use a linked list of
+CL_ResourceType objects. It walks through all the resource type objects, and then asks wether it can
+attach data to the resource. If no resource type recognizes the resource, the resource manager will throw
+and exception, telling the program that it has encountered an unknown resource type.</p>
+
+<p>ClanLib contain a template class called CL_RegisterResourceType<ResourceDataClass> that allows you
+to construct simple resource type objects, that just attach a single data object to the resource. Registration
+of resource types require that you create an instance of CL_ResourceType. The template class is inheriated
+from CL_ResourceType and is nothing more than a convience class. An example of its usage:</p>
+
+<code>
+void MyApp::main(int argc, char **argv)
+{
+	CL_SetupCore::init();
+
+	CL_RegisterResourceType<ResourceData_Map> resource_type_map("map"); // register resource type 'map'
+	CL_ResourceManager manager("resources.scr", false);
+	CL_Resource &map_resource = manager.get_resource("our_map");
+
+	map_resource.load(); // calls on_load_file() on our data object
+	ResourceData_Map *map = (ResourceData_Map *) map_resource.get_data("map");
+	
+	std::cout << "width of map: " << map->width << std::endl;
+
+	map_resource.unload(); // calls on_unload() on our data object
+	
+	CL_SetupCore::deinit();
+}
+</code>
+
+<p>That's it! We have constructed our own custom resource.</p>
+
+<h3>Extending existing resource types</h3>
+
+<p>It is possible to have several resource type objects for the same resource. This is practical if you
+want to extend an already existing resource type with more functionality. Each resource type object can
+attach its own data to the resource object, allowing you to eg. add "animation_data" to a surface type.</p>
+
+<p>The following is a small example of how to extend the surface type with some additional data:</p>
+
+<code>
+class AnimationData;
+
+class AnimationSurface : public CL_Surface
+{
+public:
+	AnimationSurface(const std::string &res_id, CL_ResourceManager *resources)
+	: CL_Surface(res_id, resources)
+	{
+		CL_Resource &resource = resources->get_resource(res_id);
+		anim_data = (AnimationData *) resource.get_data("animation_data");
+	}
+	
+	AnimationData *get_anim_data() { return anim_data; }
+	
+private:
+	AnimationData *anim_data;
+};
+
+class AnimationData : public CL_ResourceData
+{
+public:
+	AnimationData(CL_Resource &resource)
+	{
+		some_data = resource.get_option("anim_data").get_value();
+		resource.attach_data(this);
+	}
+	
+	std::string some_data;
+};
+
+class MyApplication : public CL_ClanApplication
+{
+public:
+	virtual int main(int argc, char **argv)
+	{
+		CL_SetupCore::init();
+		CL_SetupDisplay::init();
+		CL_RegisterResourceType<AnimationData> restype_anim("surface");
+		
+		CL_Display::set_videomode(640, 480, 16, false);
+		
+		CL_ResourceManager resources("resources.scr", false);
+		AnimationSurface surf("my_surf", &resources);
+		surf.put_screen(0, 0);
+		CL_Display::flip_display();
+		
+		std::cout << "some data: " << surf.get_anim_data()->some_data.c_str() << std::endl;
+		
+		CL_SetupDisplay::deinit();
+		CL_SetupCore::deinit();
+	
+		return 0;
+	}
+} app;
+</code>
+
+</body>
+</xml>
+

@@ -1,0 +1,37 @@
+#
+# Makefile data for clanSmallJPEG library.
+#
+
+clanSmallJPEG: Libs/libclanSmallJPEG.so Libs/libclanSmallJPEG.a
+
+installSmallJPEG: clanSmallJPEG
+	@for i in `find Sources/API/SmallJPEG -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/SmallJPEG -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/jpeg.h $(INC_PREFIX)/ClanLib/jpeg.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanSmallJPEG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanSmallJPEG.a $(LIB_PREFIX)
+	@ln -s -f libclanSmallJPEG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanSmallJPEG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanSmallJPEG.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanSmallJPEG.so
+
+
+OBJF_LIB_SMALLJPEG = \
+	Libs/Intermediate/jpgd_provider.o \
+	Libs/Intermediate/h2v2.o \
+	Libs/Intermediate/idct.o \
+	Libs/Intermediate/jidctfst.o \
+	Libs/Intermediate/jpegdecoder.o 
+
+OBJF_JPEG_INTEL_ASM = \
+	ifast.o
+
+Libs/libclanSmallJPEG.so: Libs/libclanCore.so Libs/libclanDisplay.so $(OBJF_LIB_SMALLJPEG) @small_jpeg_assembly@
+	@echo "Building Libs/libclanSmallJPEG.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanSmallJPEG.so.$(D_VERSION_MAJOR) -o Libs/libclanSmallJPEG.so.$(D_VERSION_MINOR) $(OBJF_LIB_SMALLJPEG) -L Libs -lclanCore -lclanDisplay
+	@ln -s -f libclanSmallJPEG.so.$(D_VERSION_MINOR) Libs/libclanSmallJPEG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanSmallJPEG.so.$(D_VERSION_MAJOR) Libs/libclanSmallJPEG.so
+
+Libs/libclanSmallJPEG.a: $(OBJF_LIB_SMALLJPEG)
+	@echo "Building Libs/libclanSmallJPEG.a"
+	-@if [ -e Libs/libclanSmallJPEG.a ]; then rm -f Libs/libclanSmallJPEG.a; fi
+	@ar qc Libs/libclanSmallJPEG.a $(OBJF_LIB_SMALLJPEG)

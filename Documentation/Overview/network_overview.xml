@@ -1,0 +1,881 @@
+<xml>
+<head>
+<title>Network API overview</title>
+</head>
+<body>
+
+<h3>Abstract:</h3>
+
+<p>This document explains how to write network games with ClanLib's network
+model. There are currently four different levels of abstraction in clanNetwork:</p>
+
+<ul>
+<li>ClanLib Sockets, the low-level part</li>
+<li>ClanLib NetChannels, the mid-level part</li>
+<li>ClanLib NetObjects, the high-level part</li>
+<li>ClanLib World-template, experimental game network engine thingy</li>
+</ul>
+
+<h2>ClanLib Sockets, the low-level part</h2>
+
+<p>The lowest level is <codelink>CL_Socket</codelink>. This is platform independent
+version of the system level socket functions, encapsulated in a class for your
+convience. A simple example:</p>
+
+<code>
+/* Gets clanlib.org's index.html page: */
+try
+{
+  std::string request_msg = "GET index.html HTTP/1.0\n\n";
+  CL_Socket sock(CL_Socket::tcp);
+  sock.connect(CL_IPAddress("clanlib.org", 80));
+  sock.send(request_msg);
+  while (true)
+  {
+    char buffer[16*1024+1];
+    int received = sock.recv(buffer, 16*1024);
+    if (received == 0) break; // end of stream. server closed connection.
+    buffer[received] = 0;
+    std::cout << buffer;
+  }
+  std::cout << std::endl;
+}
+catch (CL_Error err)
+{
+  std::cout << "Why wont things never work as planned? " <<
+    err.message.c_str() << std::endl;
+}
+</code>
+
+<p>The <codelink>CL_BufferedSocket</codelink> class is not completely implemented
+and should not be used. I'm not even anymore sure it was a good idea and it might
+be pending for removal.</p>
+
+<h3>EventTriggers:</h3>
+
+<p>Additionally to this, <codelink>CL_Socket</codelink> can use the
+<codelink>CL_EventTrigger</codelink> and <codelink>CL_EventListener</codelink>
+to wait for socket data. A small example:</p>
+
+<code>
+void wait_for_socket_data(CL_Socket &sock, int timeout)
+{
+  CL_EventTrigger *read_trigger = sock.get_read_trigger();
+  read_trigger->wait(timeout);
+}
+
+void wait_for_sockets(std::list<CL_Socket> &sockets, int timeout)
+{
+  CL_EventListener listener;
+  std::list<CL_Socket>::iterator it;
+  for (it = sockets.begin(); it != sockets.end(); it++)
+  {
+    CL_Socket &sock = *it;
+    listener.add_trigger(sock.get_read_trigger();
+  }
+  listener.wait(timeout);
+}
+</code>
+
+<h3>OutputSources:</h3>
+<p><codelink>CL_OutputSource_Socket</codelink> is a <codelink>CL_OutputSource</codelink>
+compatible wrapper for <codelink>CL_Socket</codelink>. It can be mixed with
+<codelink>CL_Socket</codelink> since the <codelink>CL_Socket</codelink> class reference
+counts the handle to the system level socket. A small example of its usage:</p>
+
+<code>
+void send_init_handshake(CL_Socket &sock)
+{
+  CL_OutputSource_Socket output(sock);
+
+  // output.set_big_endian_mode(); // ha! as if that actually worked...
+  output.write_string("Yo dude! You've entered the 1337 socket owned by Cl4nL1b");
+
+  output.write_int(42);
+}
+</code>
+
+<p>You will find a similar <codelink>CL_InputSource_Socket</codelink> for
+reading from sockets.</p>
+
+<p>That was the lowest level socket support. It doesnt do much except save you
+from the trouble of setting up some annoying C structs and filling them with
+data.</p>
+
+<h2>ClanLib Netchannels, the mid-level part</h2>
+
+<p>The next level of abstraction is <codelink>CL_NetSession</codelink>.
+A netsession serves three main purposes:</p>
+<ul>
+<li>1. Split a single IP socket into many channels. This is good because using
+many IP ports is generally a real bad idea. People that use firewalls and
+NAT will hate you for that.</li>
+<li>2. Send data to hosts in the background, not blocking the main game thread.</li>
+<li>3. Manage a list of computers connected to the netsession.</li>
+</ul>
+
+<p>A netchannel is analog to a network port. All IP communication is divided
+into different types, each assigned its own port. HTTP is handled on port
+80, FTP on 21, telnet is 23 and so on. The same goes with network
+communication in ClanLib - here it is just called netchannel instead (to
+avoid confusion with IP ports). The main difference between a netchannel and
+a IP port is that all netchannels are packed into the same IP port.</p>
+
+<p>A netsession can either operate as a server, or as a client. This is
+determined at construction time, depending on which constructor you choose
+to use. If the netsession runs as a server, client netsesions can connect to
+you, and you will get a list (<codelink>CL_NetGroup</codelink>) of computers
+(<codelink>CL_NetComputer</codelink>) connected to the session. If the netsession
+runs as a client, you will only be able to see one computer: the server.
+
+<p>Example:</p>
+<code>	
+// Create a server
+CL_NetSession server("MyGame", 5555);
+
+// Create a client
+CL_NetSession client("MyGame", localhost, 5555);
+</code>
+
+<!--
+<p>find_sessions_broadcast() is not currently implemented, but is a handy
+function for finding network games on a LAN.</p>
+-->
+
+<h3>Network events:</h3>
+
+<p>Events in the network code are computers joining, leaving, closure of the
+game and access changes. These events are stored in the netsession, and needs to
+be polled.</p> There are currently no way to get these events as signal callbacks
+(<codelink>CL_NetSession::sig_computer_join()</codelink>),
+but this will be changed sometime in the near future, as polling pretty much sucks.</p>
+
+<p><codelink>CL_NetSession::receive_computer_join()</codelink> for
+instance return the first joined computer, next time it called the next is
+returned, and when all joined computers has been reported it throws an exception.</p>
+
+<h3>Sending data on a netchannel:</h3>
+<p>In order to send data to computer, you need assign a netchannel for that
+kind of data you want to send. For instance, use netchannel 0 for system
+messages, 1 for intercom, 2 for game objects. If then you want to send a
+message on the intercom channel, do the following:</p>
+
+<code>
+netsession.send(1, netcomputer, message);
+</code>
+
+<p>On the receiving computer, use the <codelink>CL_NetSession::receive()</codelink>
+and <codelink>CL_NetSession::peek()</codelink> function to read the message.</p>
+
+<h3>Access restrictions:</h3>
+
+<p>ClanLib supports access restrictions on its netchannels. By default, the
+server doesn't allow clients to speak on any of the channels. The server
+must explicit allow each and every client access where it is supposed have
+it. This is done for security. Furthermore a client can have read access,
+write access or both, so it is very easy to keep a good eye on the clients -
+this is good, especially in Internet games.</p>
+
+<p>The channel access stuff is currently not implemented fully, and it has some
+design problems and will most likely be either totally removed, or replaced
+by something a little more thought through.</p>
+
+<h2>ClanLib NetObjects, the high-level part</h2>
+
+<p>The third level of abstraction is the netobject interface. The
+purpose of the netobject system is to allow objects to send data to its
+other object on the receiving machine, using one netchannel.</p>
+
+<p>The netobjects API consists of two classes: <codelink>CL_NetObject_Channel</codelink>
+and <codelink>CL_NetObject</codelink>. The channel class is the controlling class
+that listens to a netchannel and dispatches the messages to the correct netobject.
+It also manages the global list of IDs that identify a netobject across the network.</p>
+
+<p>The netobject class represents an object. When constructed, it will register
+itself at the netobject channel and get an unique ID assigned. The
+application can then use <codelink>CL_NetObject::send()</codelink> to send data to
+the listening <codelink>CL_NetObject</codelink> object on an other computer.
+When the other computer receives this initial message, it will notice that there
+is no <codelink>CL_NetObject</codelink> for that object. This causes the netobject
+channel object to invoke <codelink>CL_NetObject::sig_create_object</codelink>,
+which allows the receiving computer to create an object based on the message
+(or ignore it or whatever it wants with it).</p>
+
+<p>If the receiving computer decides to keep the <codelink>CL_NetObject</codelink>
+assigned to it in <codelink>CL_NetObject::sig_create_object</codelink>, any further
+messages sent to this object to be routed to callbacks connected to the object.
+Also, if the receiving computer wants to send data back to the owner object, it
+should use <codelink>CL_NetObject::talkback()</codelink>.</p>
+
+<h2>ClanLib World-template, experimental game network engine thingy</h2>
+
+<p>Finally there is something called a "world template" that works on top of
+this all. Its a kind of game network engine thingy built into a template so
+that common stuff doesnt have to be written - still at a pretty experimental stage.</p>
+
+<p>The NetObjects example uses this template, so have a look there if you need
+to live on the bleeding edge of network development :)</p>
+
+<!--
+
+<p>It has proven a much more difficult task to document / explain ClanLib's
+high level network component to others, than of what I've first expected. In
+my previous attemts I tried to explain the concept of each highlevel class,
+but I think it failed because people needed a better insight in network
+client/server communication in games - and perhaps more importantly need to
+get picture of what I mean, when I use terms such as "client/server", "host
+to host" and talks about incapsulating the game object communication into
+classes like the <codelink>CL_NetObject</codelink>.</p>
+
+<h3>NetObjects</h3>
+
+<p>Lets us try and design a very simple client/server game.</p>
+
+<p>Imagine a top-down racing game. We have 4 cars in the game, each has these
+variables: x, y, direction, speed and damage. As a header file, it could be
+described like this:</p>
+
+<code>
+#define CHANNEL_UPDATES 1
+
+class RacingEngine
+{
+	CL_NetGame *netgame;
+	Car cars[4];
+		
+	CL_InputAxis *axis_turn;
+	CL_InputAxis *axis_speed;
+public:
+	void send_updates_to_clients();
+	void read_updates_from_server();
+
+	void read_input_from_clients();
+	void send_input_to_server();
+	...
+};
+
+struct Car
+{
+	int x, y, direction, speed, damage;
+	
+	float axis_turn, axis_speed;
+};
+</code>
+
+<p>The server needs to car position updates to the clients. It could be done
+like this:</p>
+
+<code>
+void RacingEngine::send_updates_to_clients()
+{
+	CL_OutputSource_Memory updates;
+		
+	for (int i=0; i<4; i++)
+	{
+		updates.write_int32(cars[i].x);
+		updates.write_int32(cars[i].y);
+		updates.write_int32(cars[i].direction);
+		updates.write_int32(cars[i].speed);
+		updates.write_int32(cars[i].damage);
+	}
+		
+	netgame->send(
+		CHANNEL_UPDATES,
+		netgame->all,
+		updates);
+}
+</code>
+
+<p>This would have to be read again in the clients:</p>
+
+<code>
+void RacingEngine::read_input_from_clients()
+{
+	// Any new update package from server?
+	if (netgame->peek(CHANNEL_UPDATES) == false) return;
+
+	CL_InputSource_Memory updates =
+		netgame->receive(CHANNEL_UPDATES);
+		
+	for (int i=0; i<4; i++)
+	{
+		cars[i].x = updates.read_int32();
+		cars[i].y = updates.read_int32();
+		cars[i].direction = updates.read_int32();
+		cars[i].speed = updates.read_int32();
+		cars[i].damage = updates.read_int32();
+	}
+}
+</code>
+
+<p>The two above functions pretty much completely sets up the server -> client
+communication. Now we only need to inform the server about the state of each
+clients input device. First the send function:</p>
+
+<code>
+void RacingEngine::send_input_to_server()
+{
+	CL_OutputSource_Memory msg;
+		
+	msg.write_float32(axis_turn->get_pos());
+	msg.write_float32(axis_speed->get_pos());
+
+	netgame->send(
+		CHANNEL_INPUTDEV,
+		netgame->server,
+		msg);
+}
+</code>
+
+<p>And the server's read function:</p>
+
+<code>
+void RacingEngine::read_input_from_server()
+{
+	// Read all updates received:
+	while (netgame->peek(CHANNEL_INPUT)
+	{
+		CL_NetMessage netmsg = 
+			netgame->receive(CHANNEL_INPUTDEV);
+			
+		int player_id = map_netcomputer_to_player_id(netmsg.from);
+			
+		CL_InputSource_Memory msg = netmsg;
+		cars[player_id].axis_turn = msg.read_float32();
+		cars[player_id].axis_speed = msg.read_float32();
+			
+		// add paranoia variable check here if you don't trust client.
+	}
+}
+</code>
+
+<p>With the exceptance of netgame creation/joining and actual game code, this
+should be able to do it.</p>
+
+<p>Looks simple, right? The only problem with the above code is that it is a
+simplified example. No real game has only one game object type, and no real
+game has only four static game objects.</p>
+
+<p>It is time to get more realistic.</p>
+
+<p>The above send_updates_to_clients() and read_updates_from_server()
+functions need to be different for each object type. In ClanLib these two
+functions are called <codelink>serialize_save(CL_OutputSource
+*output)</codelink> and <codelink>serialize_load(CL_InputSource
+*input)</codelink>. They are also moved into the class, like this:</p>
+
+<code>
+class GameObject
+{
+public:
+	virtual void serialize_load(CL_InputSource *input)=0;
+	virtual void serialize_save(CL_OutputSource *output)=0;
+};
+
+class Car : public GameObject
+{
+	int x, y, direction, speed, damage;
+	float axis_turn, axis_speed;
+	
+public:
+	virtual void serialize_load(CL_InputSource *input);
+	virtual void serialize_save(CL_OutputSource *output);
+};
+</code>
+
+<p>In ClanLib this is called a netobject.</p>
+
+<p>Unlike send_updates_to_client() and read_updates_from_server(), the
+serialize functions do not actual call
+<codelink>CL_NetGame::send()</codelink> or
+<codelink>CL_NetGame::receive()</codelink>, they only prepare the data for
+these calls. The sending/receiving can be done by the game itself, or it
+could use one of ClanLib's NetObjectControllers.</p>
+
+<p>ClanLib currently supports an extended version of the
+<codelink>CL_NetObject</codelink> class; called
+<codelink>CL_NetObject_Simple</codelink>. It saves you from inheriting the
+serialize functions, and instead describe the variables to be serialized in
+the constructor:</p>
+
+<code>
+class Car : public CL_NetObject_Simple
+{
+public:
+	Car()
+	{
+		add_int32(&x);
+		add_int32(&y);
+		add_int32(&direction);
+		add_int32(&speed);
+		add_int32(&damage);
+		
+		...
+	}
+
+	...
+	
+private:
+	int x, y, direction, speed, damage;
+};
+</code>
+
+<p>In more complicated objects this simplification may not be possible. The
+amount of data to be saved/restored may not be a limited static amount. A
+worm in worm game may have different lengths for instance, and in such a
+case it is smarter to inherit the serialize functions instead.</p>
+
+<h3>NetObject controllers</h3>
+
+<p>In the introduction to the net objects, we left out one important detail:
+The code sending the serialized data across the net. The reason is simple. A
+netobject shouldn't need how (and where) its serialized data is sent or
+received from. This is always handled from a central place in the game, and
+is easiest illustrated with some code:</p>
+
+<code>
+class RacingEngine
+{
+	CL_NetGame *netgame;
+	Car cars[4];
+
+	void send_objects(); // called by server.
+	void update_objects(); // called by client.
+};
+
+void RacingEngine::send_objects()
+{
+	CL_OutputSource_Memory output;
+	for (int i=0; i<4; i++)
+	{
+		cars[i].serialize_save(&output);
+	}
+	
+	netgame->send(
+		CHANNEL_UPDATES,
+		netgame->all,
+		output);
+}
+
+void RacingEngine::update_objects()
+{
+	// Read all updates received:
+	while (netgame->peek(CHANNEL_UPDATES))
+	{
+		CL_InputSource_Memory input =
+			netgame->receive(CHANNEL_UPDATES);
+
+		for (int i=0; i<4; i++)
+		{
+			cars[i].serialize_load(&input);
+		}
+	}
+}
+</code>
+
+<p>The above sending and retrival of data is called a
+<codelink>CL_NetObjectController</codelink> in ClanLib. Its typical
+functionality can be summarized to:</p>
+
+<ul>
+<li>Route data from the sending netobject to the receiving slave object on
+the clients.</li>
+<li>Create slave (client side) netobjects when asked to by the server
+(usually when master netobject is created on the server).</li>
+</ul>
+
+<p>The above racing game example doesn't create the objects on the client,
+but in most games it is a vital feature. It is not needed here only because
+the case is so simplified (a static list of objects, not a dynamic).</p>
+
+<p>A netobject controller isn't nessesary limited to the above
+functionality. In more complex games it becomes important to have a wider
+array of different degrees of serialization, primarily to reduce network
+bandwidth when playing on Internet. We will go futher into this in the end
+of this article.</p>
+
+<h3>Real world example</h3>
+
+<p>My experience with people is that the above description of netobjects
+(and their controllers) is hard to understand without seeing it in a larger
+scale. This section will therefore try build a lot more complicated game
+than the above car game, and show how it should be implemented.</p>
+
+<p>This time we are trying to build a 2D MUD game, and let us imagine the
+game has the following types of objects:</p>
+
+<ul>
+<li>A tile based map.</li>
+<li>Entities (players and monsters).</li>
+<li>Items (weapons and stuff).</li>
+</ul>
+
+<p>A logical way of setting up the game-world in this type of game, would be
+something like this:</p>
+
+<code>
+class Map;
+class GameObject;
+
+class Item : public GameObject;
+class Weapon : public Item;
+class Axe : public Weapon;
+class Dagger : public Weapon;
+
+class Entity : public GameObject;
+class Human : public Entity;
+class Serpent : public Entity;
+
+class World
+{
+	void run_game();
+	CL_List<GameObject> game_objects;
+	Map map;
+};
+</code>
+
+<p>The World contains a list of all the objects in the game, and a function
+used to run the entire game. I may choose to call this function the "game
+loop", because it usually looks like this:</p>
+
+<code>
+void World::run_game()
+{
+	int last_time = CL_System::get_time();
+
+	while (CL_Keyboard::get_keycode(CL_KEY_ESCAPE) != false)
+	{
+		// How much time elapsed since loop run-through?
+		float time_elapsed =
+			(CL_System::get_time()-last_time) / 1000.0f;
+		
+		last_time = CL_System::get_time();
+		
+		// Run all objects. (move, think and such)
+		CL_Iterator<GameObject> counter(game_objects);
+		while (counter.next() != NULL)
+		{
+			counter()->run(time_elapsed);
+		}
+
+		// Delete objects.
+		while (counter.next() != NULL)
+		{
+			if (counter()->delete_me())
+			{
+				delete counter();
+				counter.remove();
+			}
+		}
+
+		// Show the world.
+		map.show();
+		while (counter.next() != NULL)
+		{
+			counter()->show();
+		}
+		CL_Display::flip_display();
+		
+		if (CL_System::keep_alive()) break;
+	}
+}
+</code>
+
+<p>The game object would look like this:</p>
+
+<code>
+class GameObject
+{
+public:
+	GameObject(World *world);
+	virtual ~GameObject();
+
+	virtual void run(float time_elapsed)=0;
+	virtual void show()=0;
+	
+	bool delete_me();
+
+protected:
+	void set_delete_flag();
+	World *get_world();
+
+private:
+	bool delete_flag;
+	World *world;
+};
+</code>
+
+<p>A game object thinks and moves when run() is called. The time_elapsed
+parameter is used to determine how much time has elapsed since the last
+time. The object is shown by calling show(), and when delete_me() returns
+true, the World will remove it from the world.</p>
+
+<p>This game world is quite nice for single player (look at Pacman or
+Clanaconda for a real demonstration of it).</p>
+
+<h4>Adding network support</h4>
+
+<p>But we want it to work across the network.</p>
+
+<p>Just like in the Car game, this essentially means we want to transfer the
+objects (and map) to the clients. Each game object needs to be able to
+generate a netmessage that describes itself, and load it on the client
+machine. Also, each object type must have an unique ID to tell what it
+is.</p>
+
+<p>So we get a game object that can serialize itself:</p>
+
+<code>
+class CL_NetObject
+{
+public:
+	...
+	virtual void serialize_save(CL_OutputSource *output)=0;
+	virtual void serialize_load(CL_InputSource *input)=0;
+	virtual int get_netobj_type()=0;
+};
+
+class GameObject : public CL_NetObject
+{
+	... all the stuff it had before ...
+	
+	enum NetObjTypes
+	{
+		TypeAxe,
+		TypeDagger,
+		TypeHuman,
+		TypeSerpent
+	};
+};
+</code>
+
+<p>An object is sent to the client like this:</p>
+
+<ul type=n>
+<li>Server: Assigns a game object an unique id.</li>
+<li>Server: Calls serialize_save() to create a netmessage describing the
+object.</li>
+<li>Server: Sends the netmessage to the client, including its netobject
+type and unique id.</li>
+<li>Client: Reads the incoming netmessage. Tries to locate the game object on
+the client (using its unique id).
+<li>Client: If it cannot be found, a new one is created using the netobject
+type.</li>
+<li>Client: serialize_load() is called on the client game object.
+</ul>
+
+<p>Luckily all this routing code is done by the CL_NetObjectController
+class. All you have to do is to implement the CL_NetObjectCreator interface,
+which is used to create an object based on its type.</p>
+
+<p>The World class now looks like this:</p>
+
+<code>
+class World : public CL_NetObjectCreator
+{
+	... all it had before ...
+
+	virtual CL_NetObject *create_object(int netobj_type);
+	
+	CL_NetObjectController netobj_controller;
+};
+
+CL_NetObject *World::create_object(int netobj_type)
+{
+	GameObject *new_object = NULL;
+
+	switch (netobj_type)
+	{
+	case Axe:
+		new_object = new Axe(this);
+		break;
+	
+	case Dagger:
+		new_object = new Dagger(this);
+		break;
+	
+	case Human:
+		new_object = new Human(this);
+		break;
+	
+	case Serpent:
+		new_object = new Serpent(this);
+		break;
+
+	default:
+		cout << "Unknown netobject type: " << netobj_type << endl;
+		return NULL;
+	}
+	
+	game_objects.add(new_object);
+	return new_object;
+}
+</code>
+
+<p>Finally we need to update the game loop to send game object updates to
+the client, and make the client receive them:</p>
+
+<code>
+void World::run_game()
+{
+	netobj_controller.set_creator(this);
+
+	...
+	while (...)
+	{
+		...
+		
+		// update objects on client:
+		netobj_controller.update(netgame, netchannel);
+		
+		// send updates from server:
+		if (server)
+		{
+			// limit these updates to be sent only when
+			// needed. For instance using a modified flag or
+			// something.
+		
+			CL_Iterator<GameObject> counter(game_objects);
+			while (counter.next() != NULL)
+			{
+				// send is a part of CL_NetObject.
+				// (this will soon be changed to be a part
+				// of the netobject controller instead)
+
+				counter()->send(
+					netgame,
+					netchannel);
+			}
+		}
+	}
+}
+</code>
+
+<p>Have a look on Clanaconda for a real example using this system.</p>
+
+<h3>Dealing with pointers</h3>
+
+<p>Sooner or later, you will end up with a game object pointing to another
+one. In this example, it could be the Human holding an Axe.</p>
+
+<p>Let us get the Human class defined more precisely:</p>
+
+<code>
+class Human : public Entity
+{
+public:
+	virtual void serialize_load(CL_InputSource *input);
+	virtual void serialize_save(CL_OutputSource *output);
+	virtual int get_netobj_type() { return TypeHuman; }
+
+private:
+	Weapon *left_hand;
+	Weapon *right_hand;
+};
+</code>
+
+<p>All we really need to do is to map the pointer to an ID, and then map it
+back again:</p>
+
+<code>
+void Human::serialize_load(CL_InputSource *input)
+{
+	// load entity data:
+	Entity::serialize_load(input);
+	
+	left_hand = (Weapon *)
+		get_world->map_id_to_ptr(input->read_int32());
+
+	right_hand = (Weapon *)
+		get_world->map_id_to_ptr(input->read_int32());
+}
+
+void Human::serialize_save(CL_OutputSource *output)
+{
+	// save entity data:
+	Entity::serialize_save(output);
+
+	output->write_int32(
+		get_world->map_ptr_to_id(left_hand));
+	
+	output->write_int32(
+		get_world->map_ptr_to_id(right_hand));
+}
+</code>
+
+<p>As long as it is a netobject the pointer points to, you can use the
+netobjects unique id:</p>
+
+<code>
+int World::map_ptr_to_id(CL_NetObject *ptr)
+{
+	if (ptr == NULL) return -1;
+	return ptr->get_netobj_id();
+}
+
+CL_NetObject *World::map_id_to_ptr(int id)
+{
+	if (id == -1) return NULL;
+
+	CL_Iterator<GameObject> counter(game_objects);
+	while (counter.next() != NULL)
+	{
+		if (counter()->get_netobj_id() == id) return counter();
+	}
+
+	// this should not happen unless object isn't present
+	// on the client machine. assert or throw an error. 
+	assert(false);
+	return NULL;
+}
+</code>
+
+<!--
+
+<h3>Remote Input devices</h3>
+
+<p>So far, we have only concentrated on sending game object information to
+the client, but obviously the user has to send back some information on what
+he want his player object to do. In most games, this can be done in two
+ways:</p>
+
+<ul>
+<li>Use net objects.</li>
+<li>Send commands to the server stating what the client wants it to do.</li>
+</ul>
+
+<h4>Using net objects.</h4>
+
+<p>If the game only need to send a limited amount of mostly static
+information (axis positions, buttons down, etc), it is by far easiest to use
+a netobject:</p>
+
+<code>
+class CarInput : public CL_NetObject
+{
+public:
+	bool button_speed_up;
+	bool button_brakes;
+	float axis_turn;
+	
+	virtual void serialize_load(CL_InputSource *input)
+	{
+		button_speed_up = input.read_int32() ? true : false;
+		button_brakes = input.read_int32() ? true : false;
+		axis_turn = input.read_float32() ? true : false;
+	}
+};
+</code>
+
+-->
+
+<!--
+TODO: Write something about netcommands.
+TODO: Write something about using resources from the network.
+TODO: Write something about netobject pointer support.
+TODO: Write something about teqniques to limit bandwidth using different
+      degrees of serialization.
+-->
+
+</body>
+</xml>

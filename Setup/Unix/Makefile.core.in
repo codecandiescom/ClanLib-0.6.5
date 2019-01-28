@@ -1,0 +1,103 @@
+#
+# Makefile data for clanCore library.
+#
+
+clanCore: build_info Libs/libclanCore.so Libs/libclanCore.a
+
+installCore: clanCore
+	@for i in `find Sources/API/Core -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Core -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Sound -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Sound -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/core.h $(INC_PREFIX)/ClanLib/core.h
+	@install -m 0644 Sources/API/sound.h $(INC_PREFIX)/ClanLib/sound.h
+	@install -m 0644 Sources/API/efence.h $(INC_PREFIX)/ClanLib/efence.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanCore.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanCore.a $(LIB_PREFIX)
+	@ln -s -f libclanCore.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanCore.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanCore.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanCore.so
+	@install -d $(BIN_PREFIX)
+	@install Setup/Unix/clanlib-config $(BIN_PREFIX)
+
+OBJF_CORE_GENERIC = \
+	Libs/Intermediate/cl_assert.o \
+	Libs/Intermediate/datafile_inputprovider.o \
+	Libs/Intermediate/error.o \
+	Libs/Intermediate/endianess.o \
+	Libs/Intermediate/inputsource_provider_file.o \
+	Libs/Intermediate/inputsource_file.o \
+	Libs/Intermediate/inputsource_memory_generic.o \
+	Libs/Intermediate/outputsource_memory_generic.o \
+	Libs/Intermediate/inputsource_memory.o \
+	Libs/Intermediate/outputsource_memory.o \
+	Libs/Intermediate/keep_alive_generic.o \
+	Libs/Intermediate/resource.o \
+	Libs/Intermediate/resource_manager_file.o \
+	Libs/Intermediate/resource_manager.o \
+	Libs/Intermediate/resourcedata.o \
+	Libs/Intermediate/resource_tokenizer.o \
+	Libs/Intermediate/resourcetype_boolean.o \
+	Libs/Intermediate/resourcetype_string.o \
+	Libs/Intermediate/resourcetype_integer.o \
+	Libs/Intermediate/resourcetype_raw.o \
+	Libs/Intermediate/resourceoptions.o \
+	Libs/Intermediate/datafile_compiler.o \
+	Libs/Intermediate/datafile_writer.o \
+	Libs/Intermediate/inputsource.o \
+	Libs/Intermediate/outputsource.o \
+	Libs/Intermediate/runnable_func.o \
+	Libs/Intermediate/bezier.o \
+	Libs/Intermediate/cl_vector.o \
+	Libs/Intermediate/vector2.o \
+	Libs/Intermediate/resourcetype.o \
+	Libs/Intermediate/setupcore.o \
+	Libs/Intermediate/detect_mmx.o \
+	Libs/Intermediate/detect_3dnow.o \
+	Libs/Intermediate/timer_generic.o \
+	Libs/Intermediate/outputsource_file.o \
+	Libs/Intermediate/event_listener.o \
+	Libs/Intermediate/event_listener_generic.o \
+	Libs/Intermediate/event_trigger.o \
+	Libs/Intermediate/event_trigger_generic.o \
+	Libs/Intermediate/console_window.o \
+	Libs/Intermediate/console_window_generic.o
+
+OBJF_CORE_UNIX = \
+	Libs/Intermediate/init_linux.o \
+	Libs/Intermediate/appconf.o \
+	Libs/Intermediate/thread_pthread.o \
+	Libs/Intermediate/mutex_pthread.o \
+	Libs/Intermediate/event_listener_unix.o \
+	Libs/Intermediate/directory_scanner_unix.o \
+	Libs/Intermediate/directory_scanner.o \
+	Libs/Intermediate/event_trigger_unix.o
+
+OBJF_CORE_BEOS = \
+	Libs/Intermediate/thread_beos.o \
+	Libs/Intermediate/mutex_beos.o \
+	Libs/Intermediate/app_beos.o \
+	Libs/Intermediate/setupcore_beos.o \
+	Libs/Intermediate/system_beos.o
+
+#OBJF_DISP_GLX = \
+#	Libs/Intermediate/implementation_glx.o \
+#	Libs/Intermediate/displaycard_glx.o \
+#	Libs/Intermediate/blit_gl_generic.o \
+#	Libs/Intermediate/displaycard_gl_generic.o \
+
+OBJF_CORE_ALL = $(OBJF_CORE_GENERIC) $(OBJF_CORE_UNIX) $(OBJF_CORE_INTEL_ASM)
+
+LINK_CORE = @LIBS@
+
+Libs/libclanCore.so: $(OBJF_CORE_ALL)
+	@echo "Building Libs/libclanCore.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanCore.so.$(D_VERSION_MAJOR) -o Libs/libclanCore.so.$(D_VERSION_MINOR) $(OBJF_CORE_ALL) $(LINK_CORE)
+	@ln -s -f libclanCore.so.$(D_VERSION_MINOR) Libs/libclanCore.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanCore.so.$(D_VERSION_MAJOR) Libs/libclanCore.so
+
+Libs/libclanCore.a: $(OBJF_CORE_ALL)
+	@echo "Building Libs/libclanCore.a"
+	-@if [ -e Libs/libclanCore.a ]; then rm -f Libs/libclanCore.a; fi
+	@ar qc Libs/libclanCore.a $(OBJF_CORE_ALL)
+

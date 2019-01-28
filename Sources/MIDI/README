@@ -1,0 +1,4 @@
+Ok, this is a first draft of an implementation of DX7 DirectMusic API.
+Currently, the code compiles, but for non Borland users, some code clean up must be made.
+I do not include anything except the unit for the moment: I think nobody currently care about the Borland Files. However, I will include them for the next update.
+This run ONLY with DX7 and its respective include files and library.

@@ -1,0 +1,62 @@
+#
+# Makefile data for clanNetwork library.
+#
+
+clanNetwork: Libs/libclanNetwork.so Libs/libclanNetwork.a
+
+installNetwork: clanNetwork
+	@for i in `find Sources/API/Network -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Network -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/network.h $(INC_PREFIX)/ClanLib/network.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanNetwork.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanNetwork.a $(LIB_PREFIX)
+	@ln -s -f libclanNetwork.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanNetwork.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanNetwork.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanNetwork.so
+
+OBJF_LIB_NETWORK = Libs/Intermediate/netcomputer.o \
+	Libs/Intermediate/browse_client.o \
+	Libs/Intermediate/browse_client_generic.o \
+	Libs/Intermediate/browse_master.o \
+	Libs/Intermediate/browse_master_generic.o \
+	Libs/Intermediate/browse_server.o \
+	Libs/Intermediate/browse_server_generic.o \
+	Libs/Intermediate/buffered_socket.o \
+	Libs/Intermediate/buffered_socket_generic.o \
+	Libs/Intermediate/inputsource_socket.o \
+	Libs/Intermediate/netcomputer_generic.o \
+	Libs/Intermediate/netgroup.o \
+	Libs/Intermediate/netobject.o \
+	Libs/Intermediate/netobject_channel.o \
+	Libs/Intermediate/netobject_channel_generic.o \
+	Libs/Intermediate/netobject_generic.o \
+	Libs/Intermediate/netsession.o \
+	Libs/Intermediate/netsession_client.o \
+	Libs/Intermediate/netsession_generic.o \
+	Libs/Intermediate/netsession_server.o \
+	Libs/Intermediate/netvariables.o \
+	Libs/Intermediate/network_delivery_socket.o \
+	Libs/Intermediate/network_generic.o \
+	Libs/Intermediate/outputsource_socket.o \
+	Libs/Intermediate/subchannel.o \
+	Libs/Intermediate/subchannel_generic.o \
+	Libs/Intermediate/setupnetwork_unix.o \
+	Libs/Intermediate/socket.o \
+	Libs/Intermediate/socket_generic.o \
+	Libs/Intermediate/socket_select.o \
+	Libs/Intermediate/ip_address.o \
+	Libs/Intermediate/event_trigger_socket.o \
+	Libs/Intermediate/connection_provider_unix.o
+#	Libs/Intermediate/unix_pipe_connection.o 
+#	Libs/Intermediate/network_unix.o 
+
+Libs/libclanNetwork.so: Libs/libclanCore.so $(OBJF_LIB_NETWORK)
+	@echo "Building Libs/libclanNetwork.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanNetwork.so.$(D_VERSION_MAJOR) -o Libs/libclanNetwork.so.$(D_VERSION_MINOR) $(OBJF_LIB_NETWORK) -L Libs -lclanCore
+	@ln -s -f libclanNetwork.so.$(D_VERSION_MINOR) Libs/libclanNetwork.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanNetwork.so.$(D_VERSION_MAJOR) Libs/libclanNetwork.so
+
+Libs/libclanNetwork.a: $(OBJF_LIB_NETWORK)
+	@echo "Building Libs/libclanNetwork.a"
+	-@if [ -e Libs/libclanNetwork.a ]; then rm -f Libs/libclanNetwork.a; fi
+	@ar qc Libs/libclanNetwork.a $(OBJF_LIB_NETWORK)

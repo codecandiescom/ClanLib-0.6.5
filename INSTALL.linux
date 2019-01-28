@@ -1,0 +1,152 @@
+$Id: INSTALL.linux,v 1.9 2002/04/05 19:27:54 japj Exp $
+
+Readme file for ClanLib 0.6.x under Linux
+---------------------------------------------------------------------------
+This readme will guide you with compiling, installing ClanLib and creating
+your first ClanLib application.
+
+If you have downloaded the binaries, you can skip section 2 and 3.
+
+1. Getting started
+2. Checking out from CVS
+3. Compilation
+4. Creating a simple Makefile
+5. Creating a simple application
+
+
+1. Getting started
+---------------------------------------------------------------------------
+Make sure you have all the required libraries you need before you start
+compiling ClanLib. Currently, you need at least zlib and Hermes to
+compile ClanLib. Check out the Links and Download page on our website
+for more info on these libraries.
+
+Remember to read the README if you run into any problems!
+
+This is the linux/unix INSTALL document, have a look at INSTALL.win32
+for the win32 installation & readme information.
+
+
+2. Checking out from CVS
+---------------------------------------------------------------------------
+If checked out from cvs, run autogen.sh to produce the configure script:
+
+  ./autogen.sh
+
+
+3. Compilation
+---------------------------------------------------------------------------
+  ./configure
+  make
+  make install
+
+You can force enabling of implementations, or disable some - eg.:
+
+  ./configure --disable-mikmod --enable-opengl
+
+To get a list of possible options, run "./configure --help"
+
+
+The documentation can be generated and installed:
+
+  make docs
+  make docs_install
+
+
+4. Creating a simple Makefile
+---------------------------------------------------------------------------
+A simple makefile used to compile ClanLib under Linux could look like
+this:
+
+OBJS = simple.o
+
+all: $(OBJS)
+	g++ -o simple -lclanCore -lclanDisplay -lclanApp$ (OBJS)
+
+clean:
+	-rm -rf *.o
+	-rm simple
+
+Note that you should minimum link with clanCore, clanDisplay and clanApp.
+
+Optional libraries:
+     If you want to use network, add clanNetwork
+     If you want to use sound, add clanSound
+     If you want to use MikMod, add clanMikMod
+     If you want to use Vorbis, add clanVorbis
+     If you want to use OpenGL, add clanGL
+     If you want to use GUI, add clanGUI
+     If you want to use PNG, add clanPNG
+     If you want to use JPEG, add clanJPEG
+     If you want to use LUA, add clanLUA
+     If you want to use TTF, add clanTTF
+
+
+5. Creating a simple application
+---------------------------------------------------------------------------
+
+#include <ClanLib/core.h>
+#include <ClanLib/application.h>
+#include <ClanLib/display.h>
+
+class MyApp : public CL_ClanApplication
+{
+public:
+	// This function returns the name of your game
+	virtual char *get_title()
+	{
+		return "Hello World!";
+	}
+
+	virtual int main(int argc, char **argv)
+	{
+		try
+		{
+			// Initialize ClanLib base components
+			CL_SetupCore::init();
+
+			// Initialize the ClanLib display component
+			CL_SetupDisplay::init();
+
+			// Set a videomode - 640x480x16bpp
+			// false means that this program should not run full-screen
+			CL_Display::set_videomode(640, 480, 16, false);
+
+			// Run until someone presses escape
+			while (!CL_Keyboard::get_keycode(CL_KEY_ESCAPE))
+			{
+				// Clear the display in a dark blue nuance
+				// The four arguments are red, green, blue and alpha
+				// All color nuances in ClanLib are measured in the interval 0->1
+				CL_Display::clear_display(0.0f, 0.0f, 0.2f, 1.0f);
+
+				// Flip the display (using a double-buffer),
+				// showing on the screen what we have drawed
+				// since last call to flip_display()
+				CL_Display::flip_display();
+
+				// This call updates input and performs other "housekeeping"
+				// call this each frame
+				CL_System::keep_alive();
+
+				// Give the CPU a rest to catch up
+				CL_System::sleep(10);
+			}
+
+			// De-Initialize the ClanLib display component
+			CL_SetupDisplay::deinit();
+
+			// De-Initialize ClanLib base component
+			CL_SetupCore::deinit();
+		}
+		// Catch any errors from ClanLib
+		catch (CL_Error err)
+		{
+			// Display the error message
+			std::cout << err.message.c_str() << std::endl;
+		}
+
+		return 0;
+	}
+} app;
+

@@ -1,0 +1,14 @@
+labeltest
+buttontest
+frametest
+listboxtest
+inputboxtest
+menutest
+dynamic
+filedialogtest
+dialogtest
+Intermediate
+Makefile.dep
+Debug
+Release
+*.plg

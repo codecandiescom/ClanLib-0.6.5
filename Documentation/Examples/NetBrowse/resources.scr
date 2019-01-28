@@ -1,0 +1,146 @@
+background = resources/background.tga (type=surface);
+
+button_surface1 = resources/button1.tga (type=surface);
+button_surface2 = resources/button2.tga (type=surface);
+button_surface3 = resources/button3.tga (type=surface);
+button_surface4 = resources/button4.tga (type=surface);
+
+section Window
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	font_disabled = resources/font_gray.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section Button
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	font_disabled = resources/font_gray.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section InputBox
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	font_disabled = resources/font_gray.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section Label
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section ListBox
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section ComboBox
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	select_normal = resources/combobox/select.tga (type=surface, x=0, y=0);
+	select_toggled = resources/combobox/select.tga (type=surface, x=0, y=0);
+	select_disabled = resources/combobox/select.tga (type=surface, x=0, y=0);
+}
+
+section CheckBox
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	sur_checked = resources/checkbox/checked.tga (type=surface);
+	sur_unchecked = resources/checkbox/unchecked.tga (type=surface);
+	sur_disabled = resources/checkbox/disabled.tga (type=surface);
+}
+
+section ScrollBar
+{
+	increase_hor_normal = resources/scrollbar/hor_increase.tga (type=surface, x=0, y=0, width=16, height=16);
+	increase_hor_toggled = resources/scrollbar/hor_increase.tga (type=surface, x=0, y=0, width=16, height=16);
+	decrease_hor_normal = resources/scrollbar/hor_decrease.tga (type=surface, x=0, y=0, width=16, height=16);
+	decrease_hor_toggled = resources/scrollbar/hor_decrease.tga (type=surface, x=0, y=0, width=16, height=16);
+	increase_ver_normal = resources/scrollbar/ver_increase.tga (type=surface, x=0, y=0, width=16, height=16);
+	increase_ver_toggled = resources/scrollbar/ver_increase.tga (type=surface, x=0, y=0, width=16, height=16);
+	decrease_ver_normal = resources/scrollbar/ver_decrease.tga (type=surface, x=0, y=0, width=16, height=16);
+	decrease_ver_toggled = resources/scrollbar/ver_decrease.tga (type=surface, x=0, y=0, width=16, height=16);
+}
+
+section MenuItem
+{
+	font = resources/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	sur_unchecked = resources/menu/unchecked.tga (type = surface);
+	sur_checked = resources/menu/checked.tga (type = surface);
+	sur_submenu = resources/menu/submenu.tga (type = surface);
+
+	sur_new = resources/menu/new.tga (type = surface);
+	sur_open = resources/menu/open.tga (type = surface);
+	sur_save = resources/menu/save.tga (type = surface);
+}

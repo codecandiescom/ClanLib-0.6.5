@@ -1,0 +1,59 @@
+
+label title
+{
+	x = 20;
+	y = 20;
+	width = 500;
+	height = 500;
+	text = "CTalk example. Copyright (c)2001 by Magnus Norddahl and Kenneth Gangstoe"; 
+}
+
+label testing2
+{
+	x = 20;
+	y = 85;
+	width = 100;
+	height = 15;
+	text = "Username:";
+}
+
+inputbox username
+{
+	x = 20;
+	y = 100;
+	width = 300;
+}
+
+label testing
+{
+	x = 20;
+	y = 125;
+	width = 100;
+	height = 15;
+	text = "Password:";
+}
+
+inputbox password
+{
+	x = 20;
+	y = 140;
+	width = 300;
+}
+
+button ok
+{
+	text = "Login";
+	x = 25;
+	y = 165;
+	width = 50;
+	height = 20;
+}
+
+button cancel
+{
+	text = "Cancel";
+	x = 80;
+	y = 165;
+	width = 50;
+	height = 20;
+}

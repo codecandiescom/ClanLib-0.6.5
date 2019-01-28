@@ -1,0 +1,197 @@
+#
+# Unix makefile for ClanLib.
+#
+
+VPATH = Sources/MPEG:\
+	Sources/Signals:\
+	Sources/Application/Unix:\
+	Sources/Core/IOData/Unix:\
+	Sources/Core/IOData/Generic:\
+	Sources/Core/IOData:\
+	Sources/Core/System/Generic:\
+	Sources/Core/System/Unix:\
+	Sources/Core/System/Be:\
+	Sources/Core/Resources:\
+	Sources/Core/DatafileCompiler:\
+	Sources/Core/Math:\
+	Sources/Display/System/Generic:\
+	Sources/Display/System/Unix:\
+	Sources/Display/Display/Generic:\
+	Sources/Display/Display/Generic/GL:\
+	Sources/Display/Display/Svgalib:\
+	Sources/Display/Display/X11:\
+	Sources/Display/Display/GLX:\
+	Sources/Display/Display/FBDev:\
+	Sources/Display/Display/GGI:\
+	Sources/Display/Display/DirectFB:\
+	Sources/Display/Display/Be:\
+	Sources/Display/SurfaceProviders:\
+	Sources/Display/Input/Generic:\
+	Sources/Display/Input/X11:\
+	Sources/Display/Input/TTY:\
+	Sources/Display/Input/GGI:\
+	Sources/Display/Input/DirectFB:\
+	Sources/Display/Input/Be:\
+	Sources/Display/Font:\
+	Sources/Sound/System/Unix:\
+	Sources/Sound/SoundFilters:\
+	Sources/Sound/Sound/Generic:\
+        Sources/Sound/System/Generic:\
+	Sources/Sound/Sound/ClanSound:\
+	Sources/Sound/Sound/Be:\
+	Sources/Sound/SoundProviders:\
+	Sources/Network/Generic:\
+	Sources/Network/Unix:\
+	Sources/TTF:\
+	Sources/PNG:\
+	Sources/JPEG:\
+	Sources/MikMod:\
+	Sources/Lua:\
+	Sources/Lua/tolua:\
+	Sources/GL/Generic:\
+	Sources/GL/GLX:\
+	Sources/GUI:\
+	Sources/Vorbis:\
+	Sources/SmallJPEG:\
+	Sources/SmallJPEG/jpgd
+
+all: @def_make_targets@
+	@echo "---"
+	@echo "Compilation of ClanLib complete."
+	@echo "To install it, type 'make install'."
+	@echo "To build the documentation, type 'make docs'."
+	@echo ""
+	@echo "...and to destroy the earth, type 'make destroy_earth'"
+	@echo ""
+
+destroy_earth:
+	@echo "boom"
+	@echo ""
+	@echo "You are in a very dark place. You are likely to be eaten by a grue."
+	@echo ""
+
+install: @def_install_targets@
+	@echo ""
+	@echo "Installation complete, now run 'ldconfig' as root or point the"
+	@echo "LD_LIBRARY_PATH environment variable to $(LIB_PREFIX)."
+	@echo ""
+	@echo "To install the documentation, type 'make docs_install'."
+	@echo ""
+
+uninstall:
+	@echo "This procedure is not finished! Please fix Makefile.in."
+	@echo ""
+	@echo "Removing header files from $(INC_PREFIX)."
+	@rm -rf $(INC_PREFIX)/ClanLib/
+	@echo "Removing libraries from $(LIB_PREFIX)."
+	@rm -f $(LIB_PREFIX)/libclanCore.so
+	@rm -f $(LIB_PREFIX)/libclanCore.so.$(D_VERSION_MAJOR)
+	@rm -f $(LIB_PREFIX)/libclanCore.so.$(D_VERSION_MINOR)
+	-@rm -f $(LIB_PREFIX)/libclanGL.so
+	-@rm -f $(LIB_PREFIX)/libclanGL.so.$(D_VERSION_MAJOR)
+	-@rm -f $(LIB_PREFIX)/libclanGL.so.$(D_VERSION_MINOR)
+	@echo "Removing display targets from $(TARGET_PREFIX)."
+	@rm -rf $(TARGET_PREFIX)
+	@rm -f $(BIN_PREFIX)/clanlib-config
+
+strip:
+	@echo ""
+	@echo "stripping library files..."
+	@strip Libs/*.so*
+
+docs: configure docs_compile
+	@echo ""
+	@echo "Compilation of ClanLib Documentation complete."
+	@echo "To install it, type 'make docs_install'."
+	@echo "Otherwise, you can just open Documentation/index.html."
+	@echo ""
+
+docs_compile: configure
+	cd Documentation; make
+
+docs_install: docs_compile
+	cd Documentation; make install
+
+utils:  core_libs
+	@cd Utils; make
+
+clean:
+	@echo "Cleaning project..."
+	@if [ -d "Libs" ]; then rm -rf Libs; fi
+	@find . -name '*.3' -exec rm "{}" \;
+	@find . -name '*.1' -exec rm "{}" \;
+
+distclean: clean
+	@echo "Cleaning configure output, etc..."
+	@rm -f config.cache config.log config.status
+	@find . -name '.#*' -exec rm "{}" \;
+	@rm -f Makefile Setup/Unix/Makefile.conf Setup/Unix/Makefile.dep
+	@rm -f Setup/Unix/Makefile.core
+	@rm -f Setup/Unix/Makefile.display
+	@rm -f Setup/Unix/Makefile.sound
+	@rm -f Setup/Unix/Makefile.gl
+	@rm -f Setup/Unix/Makefile.gui
+	@rm -f Setup/Unix/Makefile.mikmod
+	@rm -f Setup/Unix/Makefile.lua
+	@rm -f Setup/Unix/Makefile.mpeg
+	@rm -f Setup/Unix/Makefile.app
+	@rm -f Setup/Unix/Makefile.png
+	@rm -f Setup/Unix/Makefile.jpeg
+	@rm -f Setup/Unix/Makefile.signals
+	@rm -f Setup/Unix/Makefile.vorbis
+	@rm -f Setup/Unix/Makefile.network
+	@rm -f Setup/Unix/Makefile.ttf
+	@rm -f Setup/Unix/Makefile.smalljpeg
+	@rm -f Setup/Unix/clanlib-config
+	@echo "Cleaning examples..."
+	@cd Documentation && make distclean
+	@cd Documentation/Examples && make distclean
+
+dep:
+	@echo "Building dependencies..."
+		@find . \
+		-path "./Documentation" -prune -o  \
+		-path "./Setup" -prune -o \
+		-path "./Libs" -prune -o  \
+		-path "./Sources/GL/WGL" -prune -o  \
+		-path "*Direct*" -prune -o \
+		-path "*Be*" -prune -o \
+		-path "*[Ww]in32" -prune -o \
+		-path "*MIDI*" -prune -o \
+		-path "*MPEG*" -prune -o \
+	-name *.cpp -print | sed "s/^.\///;" |  xargs g++ -w -M $(INCLUDE_DIRS)| sed "s/\(.*\.o:\)/Libs\/Intermediate\/\1/g;" > Setup/Unix/Makefile.dep 
+
+# Temporary hack:
+dep_beos:
+	@echo "Building dependencies..."
+	@find . \
+		-path "*Direct*" -prune -o \
+		-path "*Win32*" -prune -o \
+		-path "*WGL" -prune -o \
+		-path "*WinSockets" -prune -o \
+		-path "*MIDI*" -prune -o \
+		-path "*Documentation" -prune -o \
+		-name '*.cpp' | \
+	grep "\.cpp" | \
+	sed "s/^.\///;" | \
+	xargs g++ $(COMP_OPTIONS) -M | \
+	sed "s/\(.*\.o:\)/Libs\/Intermediate\/\1/g;" > Setup/Unix/Makefile.dep
+
+include Setup/Unix/Makefile.dep
+include Setup/Unix/Makefile.conf
+include Setup/Unix/Makefile.core
+include Setup/Unix/Makefile.gl
+include Setup/Unix/Makefile.display
+include Setup/Unix/Makefile.sound
+include Setup/Unix/Makefile.gui
+include Setup/Unix/Makefile.mikmod
+include Setup/Unix/Makefile.lua
+#include Setup/Unix/Makefile.mpeg
+include Setup/Unix/Makefile.png
+include Setup/Unix/Makefile.jpeg
+include Setup/Unix/Makefile.ttf
+include Setup/Unix/Makefile.signals
+include Setup/Unix/Makefile.vorbis
+include Setup/Unix/Makefile.app
+include Setup/Unix/Makefile.network
+include Setup/Unix/Makefile.smalljpeg

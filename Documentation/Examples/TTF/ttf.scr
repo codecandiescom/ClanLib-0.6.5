@@ -1,0 +1,3 @@
+section Fonts { 
+	fnt_clansoft = TIMES.TTF (type=TTF); 
+} 

@@ -1,0 +1,128 @@
+# Makefile data for clanDisplay library.
+#
+
+clanDisplay: Libs/libclanDisplay.so Libs/libclanDisplay.a
+
+installDisplay: clanDisplay
+	@for i in `find Sources/API/Display -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Display -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/display.h $(INC_PREFIX)/ClanLib/display.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanDisplay.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanDisplay.a $(LIB_PREFIX)
+	@ln -s -f libclanDisplay.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanDisplay.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanDisplay.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanDisplay.so
+
+
+OBJF_DISP_GENERIC = \
+	Libs/Intermediate/blit_alphamask_rle.o \
+	Libs/Intermediate/blit_dynamic.o \
+	Libs/Intermediate/blit_opaque.o \
+	Libs/Intermediate/blit_transparent.o \
+	Libs/Intermediate/blit_transparent_rle.o \
+	Libs/Intermediate/cardsurface_blitter.o \
+	Libs/Intermediate/cliprect.o \
+	Libs/Intermediate/display.o \
+	Libs/Intermediate/displaycard_generic.o \
+	Libs/Intermediate/font.o \
+	Libs/Intermediate/font_generic.o \
+	Libs/Intermediate/font_bitmap.o \
+	Libs/Intermediate/font_description.o \
+	Libs/Intermediate/mousecursor_generic.o \
+	Libs/Intermediate/mousecursor_provider_generic.o \
+	Libs/Intermediate/palette.o \
+	Libs/Intermediate/pixelformat.o \
+	Libs/Intermediate/provider_pcx.o \
+	Libs/Intermediate/provider_bmp.o \
+	Libs/Intermediate/provider_targa.o \
+	Libs/Intermediate/surface.o \
+	Libs/Intermediate/masktranscol_provider.o \
+	Libs/Intermediate/surface_generic.o \
+	Libs/Intermediate/surfaceprovider.o \
+	Libs/Intermediate/sprite.o \
+	Libs/Intermediate/sprite2.o \
+	Libs/Intermediate/sprite_subarray_provider.o \
+	Libs/Intermediate/sprite_subsection_provider.o \
+	Libs/Intermediate/setupdisplay_generic.o \
+	Libs/Intermediate/target_generic.o \
+	Libs/Intermediate/init_linux.o \
+	Libs/Intermediate/input.o \
+	Libs/Intermediate/inputbuffer.o \
+	Libs/Intermediate/generic_surfaceprovider.o \
+	Libs/Intermediate/res_surface_generic.o \
+	Libs/Intermediate/resource_surface_generic.o \
+	Libs/Intermediate/resource_font_generic.o \
+	Libs/Intermediate/setupdisplay_unix.o
+
+OBJF_DISP_INTEL_ASM = \
+	Libs/Intermediate/blit_transparent_noclip_asm.o \
+	Libs/Intermediate/blit_transparent_clip_asm.o
+
+OBJF_DISP_BEOS = \
+	Libs/Intermediate/displaycard_be.o \
+	Libs/Intermediate/clanwindowscreen.o \
+	Libs/Intermediate/keyboard_be.o \
+	Libs/Intermediate/target_be.o \
+	Libs/Intermediate/mouse_be.o
+
+OBJF_DISP_TTY = \
+	Libs/Intermediate/keyboard_tty.o
+
+OBJF_DISP_X11 =	\
+	Libs/Intermediate/joystick_linux.o \
+	Libs/Intermediate/keyboard_x11.o \
+	Libs/Intermediate/mouse_x11.o \
+	Libs/Intermediate/display_xwindow.o \
+	Libs/Intermediate/x11_resolution.o \
+	Libs/Intermediate/target_ximage_std.o \
+	Libs/Intermediate/target_ximage_shm.o \
+	Libs/Intermediate/target_ximage_dga.o \
+	Libs/Intermediate/x11_target.o
+
+OBJF_DISP_FBDEV = \
+	Libs/Intermediate/target_fbdev.o \
+	Libs/Intermediate/display_fbdev.o \
+	Libs/Intermediate/blit_mga.o \
+	Libs/Intermediate/fbdev_target.o \
+
+OBJF_DISP_DIRECTFB =	\
+	Libs/Intermediate/display_directfb.o \
+	Libs/Intermediate/target_directfb.o \
+	Libs/Intermediate/keyboard_directfb.o \
+	Libs/Intermediate/mouse_directfb.o \
+	Libs/Intermediate/directfb_target.o \
+	Libs/Intermediate/blit_directfb.o
+
+OBJF_DISP_GGI =	\
+	Libs/Intermediate/display_ggi.o \
+	Libs/Intermediate/target_ggi.o \
+	Libs/Intermediate/target_ggi_db.o \
+	Libs/Intermediate/target_ggi_put.o \
+	Libs/Intermediate/keyboard_ggi.o \
+	Libs/Intermediate/mouse_ggi.o \
+	Libs/Intermediate/ggi_target.o
+
+DISP_X11 = $(OBJF_DISP_X11)
+
+DISP_FBDEV = $(OBJF_DISP_FBDEV)
+
+DISP_DIRECTFB = $(OBJF_DISP_DIRECTFB)
+
+DISP_GGI = $(OBJF_DISP_GGI)
+
+OBJF_DISP_ALL = $(OBJF_DISP_GENERIC) @display_assembly@ $(OBJF_DISP_TTY) @disp_x11@ @disp_directfb@ @disp_ggi@
+
+# $(OBJF_DISP_X11) $(OBJF_DISP_FBDEV)
+
+LINK_DISP = -L Libs -lclanCore @x_libraries@ -lHermes @directfb_libs@
+
+Libs/libclanDisplay.so: Libs/libclanCore.so $(OBJF_DISP_ALL)
+	@echo "Building Libs/libclanDisplay.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanDisplay.so.$(D_VERSION_MAJOR) -o Libs/libclanDisplay.so.$(D_VERSION_MINOR) $(OBJF_DISP_ALL) $(LINK_DISP)
+	@ln -s -f libclanDisplay.so.$(D_VERSION_MINOR) Libs/libclanDisplay.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanDisplay.so.$(D_VERSION_MAJOR) Libs/libclanDisplay.so
+
+Libs/libclanDisplay.a: $(OBJF_DISP_ALL)
+	@echo "Building Libs/libclanDisplay.a"
+	-@if [ -e Libs/libclanDisplay.a ]; then rm -f Libs/libclanDisplay.a; fi
+	@ar qc Libs/libclanDisplay.a $(OBJF_DISP_ALL)

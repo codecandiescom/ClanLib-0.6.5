@@ -1,0 +1,17 @@
+<xml>
+<head>
+<title>ClanLib - Documentation</title>
+<eyecolor>orange</eyecolor>
+</head>
+<body>
+
+<p>These pages are containing documentation which will help you understand and use ClanLib.</p>
+
+<menu>
+<menuitem "Overview/index.html" "ClanLib API overview" "This section describes the overall design of the API. To get an overview of the different types of components available and the communication between them, this is good place to start.">
+<menuitem "Reference/html/class_index.html" "ClanLib API reference" "The reference section documents all the classes and their memberfunctions. If you want to know something about a specific class, this is the place to search.">
+<menuitem "FAQ.html" "ClanLib FAQ" "This file will answer the most common questions we get regarding compiling and using ClanLib.">
+</menu>
+
+</body>
+</xml>

@@ -1,0 +1,207 @@
+This files describes what equipment and software ClanLib has been tested with.
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Magnus Norddahl
+
+-------------------------------------------------------------------------------
+Computer 1 (primary developing machine, home computer)
+
+AMD Thunderbird 1000
+Asus mutterbord
+512 MB RAM
+Nvidia GeForce 2 GTS, 64 mb
+SBLive!
+
+Windows 2000 "Professional"
+Mandrake Linux 7.1
+
+-------------------------------------------------------------------------------
+Computer 2 (secondary developing machine, computer at work)
+
+AMD Athlon 500
+Asus mutterbord
+128 MB RAM
+Matrox G400
+SBLive!
+
+RedHat Linux 6.1
+XFree86 3.3.5
+Mesa 3.2
+
+-------------------------------------------------------------------------------
+Computer 3 (sometimes test things on it)
+
+Celeron 400
+AOpen crapware
+64 MB RAM
+Nvidia NV1 (a Matrox G400 is laying on the table, but the AGP port doesn't work)
+Gravis Ultrasound PnP
+
+RedHat Linux 6.0
+XFree86 3.3.?
+Mesa 3.0
+
+-------------------------------------------------------------------------------
+Computer 4 (sometimes test things on it)
+
+PII 250
+Unknown motherboard (it is Siemens computer of some sort)
+64 MB RAM
+Matrox G100
+SB clone (don't know which one)
+
+Windows 98
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Daniel Vogel
+
+-------------------------------------------------------------------------------
+Computer 1 (primary developing machine)
+
+PII 350
+Asus P2B
+256 MB RAM
+Riva TNT
+SBLive!
+
+SuSE 6.3 (2.2.13)
+XFree86 3.3.6
+
+-------------------------------------------------------------------------------
+Computer 2 (test GLX stuff on)
+
+PII 350
+Asus P2B
+64 MB RAM
+Voodoo Banshee
+SB 16
+
+SuSE 6.3 (2.2.13)
+XFree86 3.3.6
+
+-------------------------------------------------------------------------------
+Computer 3 (sometimes test things on it)
+
+Celeron 466
+Gigabyte
+196 MB RAM
+Matrox G400
+SB 16
+
+SuSE 6.3 (2.2.13)
+XFree86 3.3.6
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Joachim Andresen
+
+-------------------------------------------------------------------------------
+Computer 1 (primary developing machine)
+
+AMD k6 -3 3DNow! 450 
+EPoX MVP3G
+160 MB RAM
+Creative Annihilator PRO (GeForce256 DDR) 120@130 300@330
+SBLive!
+
+Windows 98 SE
+Mandrake 6.1 Linux 2.2.13
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Arjan Lamers
+
+-------------------------------------------------------------------------------
+Computer 1 (primary developing machine)
+
+Celeron-366
+Viper550 (Riva TNT)
+128 MB RAM
+SBLive!
+
+Windows98 
+Debian unstable (NVidia's X-server, fbdev)
+
+-------------------------------------------------------------------------------
+Computer 2 (stress test machine & fileserver)
+
+Pentium-166 (with f00f bug)
+Elsa victory Erazor (Riva128)
+40 MB RAM
+SB Awe64
+
+Debian unstable (no X, fbdev)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Jeroen Janssen
+
+-------------------------------------------------------------------------------
+
+Computer 1
+
+AMD Athlon 1000MHz
+MSI K7T Motherboard
+640Mb RAM
+GeForce2MX
+SoundBlaster Live 1024
+
+Linux Mandrake 8.1
+Redhat 7.2
+W2K
+W98
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Martin Starch
+
+-------------------------------------------------------------------------------
+
+PII 266 mHz
+256 mb ram
+Matrox G400
+Sound Blaster 16
+ABit LX MB
+
+Windows 2000 RC/2
+Redhat Linux 6.0
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Kenneth Gangstø (Sphair)
+-------------------------------------------------------------------------------
+
+Computer 1:
+  AMV Duron 800                     Windows 98 SE
+  384 Mb RAM
+  nVidia GeForce 2 GTS 32Mb
+  Sound Blaster 16
+  ABit KT7A
+
+Computer 2:
+  Celeron 300@450                   Windows 98 SE
+  128 Mb RAM                        Redhat Linux 6.0
+  Hercules TNT 16Mb                 Mandrake Linux 7.1
+  Sound Blaster 16
+  ABit BH6
+  Joystick
+
+Computer 3: (Laptop)
+  Celeron 350                       Windows 98 SE
+  128 Mb RAM
+  ATI Rage Pro LT 8Mb
+  SB compatible soundcard
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+

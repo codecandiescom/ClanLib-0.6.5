@@ -1,0 +1,38 @@
+$Id: CREDITS,v 1.16 2002/01/22 11:06:21 sphair Exp $
+
+This file contains the somewhat complete list of the people, who made
+ClanLib what it is today. If you contribute anything to ClanLib, please feel
+free to add yourself to this file!
+
+ClanLib developers:
+(Ranked after work and coolness)
+
+  Magnus Norddahl <mbn@clanlib.org>
+  Kenneth Gangstoe <sphair@clanlib.org>
+  Martin Starch Soerensen <starch@clanlib.org>
+  Jeroen Janssen <japj@clanlib.org>
+  Harry Storbacka <harrysto@nic.fi>
+  Ingo Ruhnke <grumbel@gmx.de>
+  Mark Page <rombust@postmaster.co.uk>
+  Mark Robinson <plasmoid@shaw.ca>
+  Christian Mauduit <ufoot@ufoot.org>
+
+  Daniel Vogel <666@grafzahl.de>
+  Denis Oliver Kropp <dok@fischlustig.de>
+  Christian Nentwich <C.Nentwich@cs.ucl.ac.uk>
+  Juan Pablo Sousa <jpsousa@mixcoac.upmx.mx>
+  Arjan Lamers <arjanl@sci.kun.nl>
+  Don Rivers <drivers@uswest.net>
+  Nick Roberts
+  Joachim Andresen <joachim.andresen@ah.telia.no>
+  Baldur Norddahl <bbn@clansoft.dk>
+  Daniel A. Palm <nightwinddp@yahoo.com>
+  Lenny Palozzi <domain@ica.net>
+  Simon Vaillancourt <simon_v@videotron.ca>
+  Daniel James Patterson <danpat@cs.rmit.edu.au>
+  Karsten Laux <klaux@student.uni-kl.de>
+
+Other credits:
+  Sam Lantinga (a very very very very very few lines of SDLs code were ripped)
+  Rafael R. Sevilla (for the line drawing code)
+  Marcus Sundberg (Denis was teached by his MGA code)

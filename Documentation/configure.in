@@ -1,0 +1,55 @@
+dnl $Id: configure.in,v 1.4 2002/02/20 19:52:32 japj Exp $
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl
+dnl This configure script is for being able to generate the documentation
+dnl without the need to configure the entire ClanLib stuff.
+dnl
+
+AC_INIT(index.xml)
+dnl AC_CONFIG_SRCDIR([index.xml])
+
+AC_PREFIX_DEFAULT(/usr/local)
+
+dnl ----------------------------
+dnl ClanLib version information:
+dnl ----------------------------
+
+version_major="1"
+version_minor="0.6.0"
+cl_version="0,6,0"
+
+AC_SUBST(version_major)
+AC_SUBST(version_minor)
+AC_SUBST(cl_version)
+
+
+dnl ---------------------------------
+dnl Try to locate perl on the system:
+dnl ---------------------------------
+
+AC_MSG_CHECKING(for perl)
+if test -x /bin/perl; then
+	perl_exec="/bin/perl"
+fi
+if test -x /usr/bin/perl; then
+	perl_exec="/usr/bin/perl"
+fi
+if test -x /usr/local/bin/perl; then
+	perl_exec="/usr/local/bin/perl"
+fi
+if test -x perl; then
+	perl_exec = "perl"
+fi
+if test "$perl_exec" = ""; then
+	perl_exec="/usr/bin/perl"
+	AC_MSG_RESULT("no - documentation cannot be compiled")
+else
+	AC_MSG_RESULT("found at $perl_exec")
+fi
+AC_SUBST(perl_exec)
+
+AC_OUTPUT([ Makefile Utilities/webbuilder.pl Reference/Makefile Tutorial/Makefile Overview/Makefile ])
+chmod a+x Utilities/webbuilder.pl
+chmod a+x Utilities/efed.pl
+chmod a+x Utilities/transform.sh

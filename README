@@ -1,0 +1,90 @@
+$Id: README,v 1.19 2001/11/29 13:07:58 sphair Exp $
+
+Getting started
+---------------
+PLEASE! Please read the INSTALL files for the platform/compiler you want to use.
+See INSTALL.win32, INSTALL.linux, INSTALL.borland, INSTALL.beos.
+
+
+Upgrading from earlier ClanLib versions
+---------------------------------------
+If you are upgrading your ClanLib project from ClanLib 0.4.x, read the
+file README.upgrade for API changes.
+Also, changes within 0.5.x is described in this file.
+
+
+Documentation / FAQ
+-------------------
+If you get any problems, there is a FAQ in the Documentation folder; it might have
+an answer to your questions. Otherwise, read the overviews for specific info on
+the various areas of ClanLib.
+
+  Documentation/Examples: Many small examples showing features of ClanLib.
+  Documentation/Overview: Articles about certain features of ClanLib.
+  Documentation/Reference: The complete API reference to all ClanLib classes.
+  Documentation/Tutorial: A tutorial about game programming with ClanLib.
+  Documentation/FAQ: Frequently asked/answered questions.
+
+If you are using Windows, and haven't got the tools required to
+build the documentations, we suggest you download them from our website.
+
+
+Mailing lists
+-------------
+You can subscribe to our mailing lists, either by visiting the website
+at http://clanlib.org/mailinglist.html, or do it manually by sending
+mails as described below.
+
+You can subscribe to the ClanLib mailing lists by sending a mail to:
+	clanlib-user-subscribe@dark.x.dtu.dk
+	clanlib-devel-subscribe@dark.x.dtu.dk
+You can then afterwards send mail to:
+	clanlib-user@dark.x.dtu.dk.
+	clanlib-devel@dark.x.dtu.dk.
+If you want to unsubcribe at any time, just send a mail to:
+	clanlib-user-unsubscribe@dark.x.dtu.dk.
+	clanlib-devel-unsubscribe@dark.x.dtu.dk.
+
+We also have digest versions of the lists, the email addresses there are:
+	clanlib-user-digest-subscribe@dark.x.dtu.dk
+	clanlib-user-digest-unsubscribe@dark.x.dtu.dk
+	clanlib-devel-digest-subscribe@dark.x.dtu.dk
+	clanlib-devel-digest-unsubscribe@dark.x.dtu.dk
+
+We also have a CVS commit message mailing list:
+	clanlib_cvs@dark.x.dtu.dk.
+
+Everytime anything is commited to cvs, it will be posted on that list. This
+is very useful for people that want to follow cvs development very closely.
+To subscribe, send a mail to:
+	clanlib_cvs-subscribe@dark.x.dtu.dk.
+To unsubscribe:
+	clanlib_cvs-unsubscribe@dark.x.dtu.dk.
+
+
+Making ClanLib even better
+--------------------------
+We are grateful for all the help we can get, and if you wish to contribute with
+anything, don't hesitate to contact us.
+
+If you have fixed something in ClanLib, you can send us a patch. Please have a
+look at the PATCHES file for more detailed information.
+
+We have an archive of cvs logs at http://dark.x.dtu.dk/~mbn/clanlib/cvslogs
+
+
+ClanLib Website
+---------------
+Check out ClanLib homepage at:
+
+	http://www.clanlib.org
+
+Here you will find:
+- News about ClanLib development
+- Downloads of ClanLib and other required/optional libraries
+- Links to ClanLib games
+- Much more!
+
+--
+Enjoy,
+The ClanLib development team

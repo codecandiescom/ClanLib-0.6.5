@@ -1,0 +1,19 @@
+This is a PRELIMINARY port of ClanLib to BeOS. It doesn't work yet.
+Start working on the TODO list below, and when that is empty,
+the port might start to work.
+
+REQUIREMENTS:
+- BeOS develop tools
+- autoconf
+- Hermes
+- Perl (not really neccessary unless building documentation)
+
+TODO:
+- Fix mutex_beos and thread_beos
+- Fix sound
+- Fix network
+- The ClanLib libs get REALLY REALLY big in debugmode.. find out why and fix.
+
+--
+Enjoy,
+The ClanLib Development Team

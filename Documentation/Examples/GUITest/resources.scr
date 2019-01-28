@@ -1,0 +1,4 @@
+button_surface1 = resources/button1.tga (type=surface);
+button_surface2 = resources/button2.tga (type=surface);
+button_surface3 = resources/button3.tga (type=surface);
+button_surface4 = resources/button4.tga (type=surface);

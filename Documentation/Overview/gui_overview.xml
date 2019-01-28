@@ -1,0 +1,193 @@
+<xml>
+<head>
+<title>GUI API Overview</title>
+</head>
+<body>
+
+<h2>Abstract:</h2>
+
+<p>A new API as of ClanLib 0.5 is the ClanLib GUI (Graphics User Interface).
+This document describes the ClanLib GUI API as of December 2001. The GUI is
+still subject to change, but the basic structure should be solid, and people
+are encouraged to try it out, as it provides an easy flexible and
+customizable way to do GUIs in games.</p>
+
+<h3>Implementing a GUI with ClanLib</h3>
+
+<p>Thanks to the new GUI API in ClanLib, having a GUI in your game no longer
+has to be an ardous boring task. ClanLib GUI comes complete with
+implementations of most standard widgets/components, such as inputboxes,
+scrollbars, comboboxes, menus, listboxes, checkboxes and buttons.</p>
+
+<p>At the core of the ClanLib GUI API, lies the routing of GUI input to game
+code. ClanLib uses a signals/slot system for this. If you are familiar with
+QT, you should also be familiar with signals and slots, but if you're in
+doubt, you can read our signals and slots <a
+href="signals.html">overview</a>.</p>
+
+<p>The ClanLib GUI has a default look, eg. the way each component is
+displayed, but the logical functionality of each implemented base-component
+is entirely isolated from the displaying, so it's easy to create a
+customized GUI "style". Styles are managed through a style-manager that
+makes it easy to extend the default-style with new ones. This makes it
+possible for people to create a new GUI style, and release it for easy use
+by other ClanLib-users. An overview on how to create custom style will be
+written sometime soon.</p>
+
+<p>GUIs can be defined in special GUI definition script files, which provide
+a flexible and powerful way to describe the layout of a GUI. Components are
+layered in a hierachical fashion where certain component types (such as a
+frame) can have child-components. Each component has a set of parameters
+(mandatory or optional) that describe the component, and through a
+naming-scheme, these components can be modified and hooked to callback
+functions at run-time. </p>
+
+<h3>GUI System Basics</h3>
+
+<p>In order to be able to use any GUI toolkit properly and take fully
+advantage of its possibilities, it is essential to understand how the core
+classes operate and communicate with each others. In clanGUI there are the
+following core classes:</p>
+
+<ul>
+<li>CL_Component</li>
+<li>CL_ComponentStyle</li>
+<li>CL_StyleManager</li>
+<li>CL_GUIManager</li>
+<li>CL_ComponentManager</li>
+</ul>
+
+<h4>CL_Component</h4>
+
+<p>The component class is the core class of clanGUI. It presents any
+widget/control/window in the system and is responsible for drawing the
+components and feeding the components with user input.</p>
+
+<p>As with just about any other GUI toolkit out there, components are
+ordered in a tree. At the top of the tree, we have the root/desktop
+component. It represents the entire screen area and any child components on
+the screen. A typical child of the root component could be a window
+component, and the window component then has maybe a inputbox and two button
+child components. Anyone ever having looked at a GUI toolkit earlier in
+their life should be familiar with this concept. :)</p>
+
+<p>The root component in clanGUI is called CL_GUIManager. More on this when
+we examine the GUI manager more closely.</p>
+
+<p>CL_Component exports a large set of signals that any subclassed component
+usually connects signals to. The GUI emits these events whenever interaction
+with the component is required. Some examples of these signals are:
+sig_paint, sig_key_down, sig_mouse_move and sig_got_focus. For instance, if
+the GUI needs the component drawn, it will emit the sig_paint signal and all
+hooked up painting functions will then draw the component.</p>
+
+<h4>CL_ComponentStyle</h4>
+
+<p>The component style class is the component styling (theme) interface.
+When a component is instantiated, one or more component style classes are
+attached to the component.</p>
+
+<p>The main purpose of the component style class is to seperate styling data
+and functions from the component class. This is directly compareable to a
+document/view relationship, where the component class is the document, and
+then style class is a view. All attached component styles are deleted when
+the component is destroyed, thus making component styles appear transparent
+from anyone using a specific component.</p>
+
+<p>To illustrate this a bit further, imagine we are constructing an input
+button. At construction time, an input button specific component style is
+attached. The style class connects a local member function to the sig_paint
+signal of its CL_Button owner and stores data needed for the styling as
+local member variables.</p>
+
+<p>When the GUI needs to draw the button, it will emit the sig_paint signal,
+which causes the member function in the style class to be called. This
+function then uses the public available attribute functions in its CL_Button
+owner to figure out what the text of the input button is and where its
+located, finally drawing the button on screen.</p>
+
+<p>This two level construction of a component allows us to construct
+component objects without knowing what theme is being used, making themes
+totally transparent for anything but the styling objects.</p>
+
+<h4>CL_StyleManager</h4>
+
+<p>Something need to attach these component styles to a component. This is
+what the CL_StyleManager interface does. When a component is constructed,
+the very first thing it does is to contact its style manager, where it asks
+it to attach component styles to it.</p>
+
+<p>CL_StyleManager also function as a class factory. When loading components
+from gui definition files, the component manager asks the style manager to
+create an instance of a control based on a type string and a set of
+component options.</p>
+
+<h4>CL_GUIManager</h4>
+
+<p>The GUI manager is the root comopnent in clanGUI. It should always be the
+top-level component in any component tree. The GUI manager contain the main
+message pump for the GUI and is responsible for routing events from clanCore
+and clanDisplay into the GUI system.</p>
+
+<p>If modal dialogs are needed, construct a new GUI manager with the
+previous component tree as its parent. This will redirect the system events
+to the modal GUI, but pump painting signals to the previous GUI.</p>
+
+<h4>CL_ComponentManager</h4>
+
+<p>The component manager is the interface used to load GUI component trees
+from a GUI definition file. Have a look on the login_view.cpp/h files in the
+CTalk example for an example of how to use it.</p>
+
+<h3>GUI definition files (.gui)</h3>
+<p>
+As mentioned, GUIs in ClanLib can be described using a GUI definition file (recommended extension: .gui).
+The GUI definition format looks a lot like the ClanLib resource manager format, so if you're familiar with
+that, you should easily get acquainted with the GUI definition format. GUI files does not have sections.
+Instead, components that can contain child-components, simply function as "sections". This means that the
+hierachical structure of the GUI is directly readable from the GUI definition file. Let's look at a small example;
+</p>
+<code>
+frame main_frame
+{
+	x = 50;
+	y = 50;
+	width = 500;
+	height = 400;
+
+	inputbox player_name
+	{
+		x = 10;
+		y = 10;
+		width = 200;
+		value = "Player Name";
+	}
+
+	button start_game
+	{
+		x = 220;
+		y = 10;
+		width = 64;
+		height = 32;
+		text = "Start";
+	}
+}
+</code>
+
+<p>A frame is a component that has no other purpose but to group components. It serves as a base "window"
+that can be used for dialog boxes etc. As this component is at the top of the component hierachy, the
+x, y position is directly mapped to initial screen coordinates. Each sub-somponent's x/y values are 
+relative to the current position of their parent. This means that player_name will always be offset 
+(10, 10) pixels from the upper-left corner of main_frame, and that both player_name and start_game will
+be dragged along if main_frame is moved. Width and height is not relative to any parents, and is measured
+in pixels also. However, all sub-components are clipped within the screen area of the parent.
+</p>
+
+<p>Every component type recognize different sets of values in the .gui file. Some values
+are mandatory for a component (they have to exist in the .gui-file for the initialization to succeed), 
+and some are optional, and have default values in case they don't exist. All component types require
+the 'x' and 'y' value, describing the position/offset of the component in question.
+</p>
+
+</body>
+</xml>

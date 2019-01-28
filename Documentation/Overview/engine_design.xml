@@ -1,0 +1,128 @@
+<xml>
+<head>
+<title>Designing a game engine, ClanLib API overview</title>
+</head>
+<body>
+
+<h2>Abstract:</h2>
+
+<p>The purpose of this document is to introduce techniques useful when
+designing a game engine.</p>
+
+<h3>Engine requirements</h3>
+
+<p>One of the most important aspects of writing a game is to have a solid
+framework, usually refered as the game engine. Although the requirements for
+the framework varies from game to game, there are still a lot of thing that
+can be generalized.</p>
+
+<p>Basic framework requirements:</p>
+
+<ul>
+<li>System to run the game.</li>
+<li>System to draw the game.</li>
+<li>Object to object communication.</li>
+<!--<li>User feedback (input).</li>-->
+</ul>
+
+<p>In order to solve those problems, we first need two basic classes: a
+World and a GameObject interface.</p>
+
+<p>The World is the main container class for the complete game. It simply
+represents everything that exist in the game. The World knows how to run the
+game, it knows how to draw the game, it knows how to do networking.
+Actually, everything that operates above invidual objects belong here.</p>
+
+<p>The GameObject interface represents a generic object in the world.
+Typically it will contain virtual functions that can run the object, draw
+the object and, if it's network game, also function that is used to
+communicate across the net.</p>
+
+<p>A minimal World and GameObject may look like this:</p>
+
+<code>
+class World
+{
+public:
+	World();
+	~World();
+
+	void show(); // draw the world.
+	void update(float time_elapsed); // run the world.
+	
+	CL_ResourceManager *get_resources();
+
+private:
+	std::list<GameObject *> objects;
+	Map *map;
+	CL_ResourceManager *resources;
+};
+
+class GameObject
+{
+public:
+	GameObject(World *world);
+	virtual ~GameObject() { return; }
+	
+	virtual void show()=0; // draw the object.
+	virtual void update(float time_elapsed)=0; // run the object.
+	
+	virtual bool get_destroy_flag() { return destroy_flag; }
+
+protected:
+	World *get_world();
+	virtual void set_destroy_flag() { destroy_flag = true; }
+	
+private:
+	World *world;
+	bool destroy_flag;
+};
+</code>
+
+<p>This is the typical interface that is used in the ClanGame demo games.
+Often we just don't call the world World. For instance, in the pacman game
+it is just part of the application class.</p>
+
+<p>When the world is asked to show itself (when show() is called), it will
+first ask the map to draw itself. Then it walk through the list of objects,
+asking each of them to draw themself (by calling show()).</p>
+
+<p>The same tactic is used for the update() function. In the update cycle,
+it will check the destroy flag of each object, and, if set, it'll remove the
+object from the list and delete it.</p>
+
+<p>Note that for your particular game, show() may accept all kinds of
+information - especially clipping information is often passed. Likewise
+there doesn't have to be difference between the map and other objects. It
+all depends on the particular game.</p>
+
+<p>In this case, update() takes a float time_elapsed as parameter. It value
+indicates how long time has passed since the last time update() was called.
+If your game needs to be turn based, you will probably prefer to pass
+something else, or nothing at all.</p>
+
+<h3>Object to object communication.</h3>
+
+<p>Imagine the following situation. We're creating a Pacman game, there are
+ghosts and then the pacman. In the Pacman demo, this is implemented as two
+GameObject inheriated objects; Pacman and Ghost.</p>
+
+<p>But there's a problem. What if we want the ghosts to talk to each other,
+how do we know what GameObject instance is a Ghost and which is a
+Pacman?</p>
+
+<p>The solution is either to use runtime type information (RTTI), doing
+dynamic_cast's from GameObject to Ghost, or to add several lists to the
+world, each one belonging to their object:</p>
+
+<code>
+std::list<GameObject *> objects;
+std::list<Ghost *> ghosts;
+</code>
+
+<p>Which method is best? Well, that's up to you to judge. :-)</p>
+
+<!--<h3>User feedback (input).</h3>-->
+
+</body>
+</xml>

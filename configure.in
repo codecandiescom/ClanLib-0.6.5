@@ -1,0 +1,710 @@
+
+dnl $Id: configure.in,v 1.117 2002/08/05 18:00:03 mbn Exp $
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl
+
+AC_PREREQ(2.50)
+AC_INIT(ascii-logo)
+
+cat ascii-logo
+
+AC_PREFIX_DEFAULT(/usr/local)
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_CPP
+AC_PROG_RANLIB
+AC_LANG_CPLUSPLUS
+AC_REQUIRE_CPP
+
+dnl ----------------------------------------
+dnl Additional include and library paths:
+dnl ----------------------------------------
+
+AC_ARG_WITH(extra-includes,[  --with-extra-includes=DIR Add extra include paths],
+  use_extra_includes="$withval",
+  use_extra_includes=NO
+)
+if test -n "$use_extra_includes" && test "$use_extra_includes" != "NO"; then
+  ac_save_ifs=$IFS
+  IFS=':'
+  for dir in $use_extra_includes; do
+    extra_includes="$extra_includes -I$dir"
+  done
+  IFS=$ac_save_ifs
+fi
+
+AC_ARG_WITH(extra-libs,    [  --with-extra-libs=DIR     Add extra library paths], 
+  use_extra_libs=$withval,
+  use_extra_libs=NO
+)
+if test -n "$use_extra_libs" && test "$use_extra_libs" != "NO"; then
+   ac_save_ifs=$IFS
+   IFS=':'
+   for dir in $use_extra_libs; do
+     extra_libraries="$extra_libraries -L$dir"
+   done
+   IFS=$ac_save_ifs
+fi
+
+AC_PATH_X
+if test "$no_x" != "yes"; then
+	X11=enabled
+	if test "$x_includes" != ""; then
+		x_includes="-I $x_includes -I $x_includes/X11"
+	fi
+
+	if test "$x_libraries" != ""; then
+		x_libraries="-L $x_libraries"
+	fi
+
+	x_libraries="$x_libraries -lX11 -lXext"
+else
+	X11=disabled
+	x_libraries=""
+	x_includes=""
+#should this be fatal?
+fi
+
+
+
+dnl -----------------------------------------------------------------------
+dnl Check system endianess: (note: ClanLib is _not_ endian clean right now)
+dnl -----------------------------------------------------------------------
+
+dnl AC_C_BIGENDIAN
+dnl AC_CHECK_SIZEOF(int, 4)
+
+if test "$ac_cv_sizeof_int" = "8"; then
+	AC_DEFINE(USE_64BIT)
+fi
+
+if test "$ac_cv_c_bigendian" = "yes"; then
+	AC_DEFINE(USE_BIG_ENDIAN)
+fi
+
+dnl ------------------------------------------------
+dnl CL_EXPAND_DIR(VARNAME, DIR)
+dnl ------------------------------------------------
+
+dnl expands occurrences of ${prefix} and ${exec_prefix} in the given DIR,
+dnl and assigns the resulting string to VARNAME
+dnl example: CL_EXPAND_DIR(LOCALEDIR, "$datadir/locale")
+dnl eg, then: AC_DEFINE_UNQUOTED(LOCALEDIR, "$LOCALEDIR")
+dnl by Alexandre Oliva 
+dnl from http://www.cygnus.com/ml/automake/1998-Aug/0040.html
+
+define([CL_EXPAND_DIR],
+[
+	$1=$2
+	$1=`(
+		test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+		test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+		eval echo \""[$]$1"\"
+	)`
+])
+
+CL_EXPAND_DIR(cl_scandir, "$libdir/ClanLib")
+AC_DEFINE_UNQUOTED(CL_SCANDIR, "$cl_scandir")
+
+dnl ------------------------------------------------
+dnl BBNs macro for checking commandline parameters:
+dnl ------------------------------------------------
+
+dnl CHECK_ENABLED(feature,help,define,default)
+define([CHECK_ENABLED],
+[
+  AC_ARG_ENABLE($1,[  $2],
+  [
+    if test "$enableval" != "no"; then
+      $3="enabled"
+      AC_DEFINE($3)
+      AC_MSG_RESULT([enabled])
+    else
+      AC_MSG_RESULT([disabled])
+    fi
+  ],
+  [
+    if test "$4" = "enabled"; then
+      $3="enabled"
+      AC_DEFINE($3)
+      AC_MSG_RESULT([enabled])
+    else
+      AC_MSG_RESULT([disabled])
+    fi
+  ])
+])
+
+dnl ---------------------------------------------------
+dnl Library test macro that also runs a .cpp test on it
+dnl ---------------------------------------------------
+
+dnl CHECK_LIB(lib,testprog,success,failed)
+define([CHECK_LIB],
+[
+  if test "x$x_includes" != xNONE; then
+    CPPFLAGS="$CPPFLAGS $x_includes"
+  fi
+  if test "x$x_libraries" != xNONE; then
+    CPPFLAGS="$CPPFLAGS $x_libraries"
+  fi
+  if test "x$extra_includes" != xNONE; then
+
+	CPPFLAGS="$CPPFLAGS $extra_includes"
+  fi
+  if test "x$extra_libraries" != xNONE; then
+    CPPFLAGS="$CPPFLAGS $extra_libraries"
+  fi
+
+  OLDLIBS="$LIBS"
+  LIBS="$5 -l$1"
+  AC_MSG_CHECKING(for $1)
+  AC_TRY_RUN(
+    `cat $2`,
+    [
+      AC_MSG_RESULT([yes])
+      $3
+    ],
+    [
+      AC_MSG_RESULT([no])
+      $4
+    ],
+    [
+      AC_MSG_RESULT([crossplatform, assuming yes])
+      $3
+    ])
+  LIBS="$OLDLIBS"
+])
+
+dnl ----------------------------------------
+dnl Search for BeOS
+dnl ----------------------------------------
+
+dnl CHECK_BEOS(success,failed)
+define([CHECK_BEOS],
+[
+  AC_MSG_CHECKING(for BeOS)
+  if test "`uname`" = "BeOS"; then
+      AC_MSG_RESULT([yes])
+      $1
+  else
+      AC_MSG_RESULT([no])
+      $2
+  fi
+])
+
+dnl ----------------------------------------
+dnl Search for libraries useful for ClanLib:
+dnl ----------------------------------------
+
+AC_CHECK_PROG(freetype_config, freetype-config, "found", [not found])
+if test $freetype_config = "found"; then
+	AC_MSG_CHECKING(FreeType version)
+	AC_MSG_RESULT([`freetype-config --version`])
+	x_includes="$x_includes `freetype-config --cflags`"
+	TypeLink="`freetype-config --libs`"
+
+	CHECK_LIB(freetype,Setup/Tests/ttf.cpp,TTF=enabled,TTF=disabled, $[TypeLink] )
+else
+	TTF=disabled
+fi
+
+AC_CHECK_LIB(z, main, , echo "ClanLib requires zlib to run."; exit 1)
+CHECK_LIB(Hermes,Setup/Tests/hermes.cpp,,echo "ClanLib requires a correctly installed Hermes 1.3.0 or newer to run."; exit 1)
+
+dnl Disabled for 0.5.x:
+dnl CHECK_LIB(ggi,Setup/Tests/ggi.cpp, GGI=enabled, GGI=disabled)
+
+CHECK_LIB(GL,Setup/Tests/opengl.cpp, OPENGL=enabled, OPENGL=disabled, [$x_libraries -lGL -lGLU -lpthread])
+CHECK_LIB(mikmod,Setup/Tests/mikmod.cpp, mikmod=enabled, mikmod=disabled, [$x_libraries -lmikmod])
+CHECK_LIB(png,Setup/Tests/png.cpp, png=enabled, png=disabled, [$x_libraries -lpng])
+CHECK_LIB(jpeg,Setup/Tests/jpeg.cpp, jpeg=enabled, jpeg=disabled, [$x_libraries -ljpeg])
+for lib in lua40 lua; do
+	dnl setting back OLDLIBS is needed because of the break
+	CHECK_LIB($lib, Setup/Tests/lua.cpp, [ lua=enabled; LIBS="$OLDLIBS"; break ], lua=disabled, [ $x_libraries ])
+done
+CHECK_LIB(vorbis,Setup/Tests/vorbis.cpp, VORBIS=enabled, VORBIS=disabled, [$x_libraries -lvorbis])
+for lib in Xxf86vm_pic Xxf86vm; do
+	dnl setting back OLDLIBS is needed because of the break
+	AC_CHECK_LIB(
+		$lib, main,
+		[ VIDMODE=enabled; x_libraries="$x_libraries -l$lib"; LIBS="$OLDLIBS"; break ],
+		VIDMODE=disabled, [ $x_libraries ]
+	)
+done
+
+AC_CANONICAL_SYSTEM
+
+AC_MSG_CHECKING(for recent linux/fb.h)
+if test $target_os = "linux-gnu" ; then
+	AC_EGREP_HEADER(mmio_len, linux/fb.h, echo yes; FBDEV=disabled; joystick=enabled, echo no; FBDEV=disabled;joystick=enabled)
+else
+	echo no 
+	FBDEV=disabled
+	joystick=disabled
+fi
+
+AC_CHECK_HEADERS(unistd.h fcntl.h sys/kd.h sys/vt.h)
+AC_EGREP_HEADER(fcvt, stdlib.h,,AC_DEFINE(NEED_FCVT))
+
+#
+# Find pkg-config and DirectFB
+#
+AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+if test x$PKG_CONFIG = xno ; then
+  AC_MSG_WARN([  *** pkg-config not found. DirectFB not available. See http://pkgconfig.sourceforge.net])
+elif ! pkg-config --atleast-pkgconfig-version 0.5 ; then
+  AC_MSG_ERROR([  *** pkg-config too old; version 0.5 or better required.])
+else
+  #
+  # Check for DirectFB
+  #
+  DIRECTFB_REQUIRED_VERSION=0.9.11
+
+  AC_MSG_CHECKING(for DirectFB)
+  if $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb ; then
+    AC_MSG_RESULT(found)
+    directfb_cflags=`$PKG_CONFIG --cflags directfb`
+    directfb_libs=`$PKG_CONFIG --libs directfb`
+    DIRECTFB=enabled
+  else
+    AC_MSG_WARN([
+      *** DirectFB $DIRECTFB_REQUIRED_VERSION or newer is required. The latest
+      *** version of DirectFB is always available from http://www.directfb.org.
+    ])
+  fi
+fi
+
+CHECK_BEOS(beos=enabled, beos=disabled)
+
+dnl Checks the system type
+
+if test $target_cpu = i386; then
+	i386=enabled
+else if test $target_cpu = i486; then
+	i386=enabled
+else if test $target_cpu = i586; then
+	i386=enabled
+else if test $target_cpu = i686; then
+	i386=enabled
+else
+	i386=disabled
+fi
+fi
+fi
+fi
+
+
+dnl -----------------------------------------------------
+dnl Check commandline parameters to the configure script:
+dnl -----------------------------------------------------
+
+AC_MSG_CHECKING(for BeOS support)
+CHECK_ENABLED(beos,
+  [--enable-beos           Enable BeOS support],
+  USE_BEOS, $beos)
+
+AC_MSG_CHECKING(for X11 support)
+CHECK_ENABLED(x11,
+  [--enable-x11            Enable X11 support],
+  USE_X11, $X11)
+
+#AC_MSG_CHECKING(for FBDev support)
+#CHECK_ENABLED(fbdev,
+#  [--enable-fbdev          Enable FBDev support],
+ # USE_FBDEV, $FBDEV)
+
+AC_MSG_CHECKING(for DirectFB support)
+CHECK_ENABLED(directfb,
+  [--enable-directfb       Enable DirectFB support],
+  USE_DIRECTFB, $DIRECTFB)
+
+AC_MSG_CHECKING(for Joystick support)
+CHECK_ENABLED(joystick,
+  [--enable-joystick       Enable Joystick support],
+  USE_JOY, $joystick) 
+
+dnl AC_MSG_CHECKING(for GGI support)
+dnl CHECK_ENABLED(ggi,
+dnl   [--enable-ggi            Enable GGI support],
+dnl   USE_GGI, $GGI)
+
+AC_MSG_CHECKING(for OpenGL support)
+CHECK_ENABLED(opengl,
+  [--enable-opengl         Enable OpenGL support],
+  USE_OPENGL, $OPENGL)
+
+AC_MSG_CHECKING(for VidMode support)
+CHECK_ENABLED(vidmode,
+  [--enable-vidmode        Enable VidMode support],
+  USE_VIDMODE, $VIDMODE)
+
+AC_MSG_CHECKING(for ClanSound support)
+CHECK_ENABLED(clansound,
+  [--enable-clansound      Enable ClanSound support],
+  USE_CLANSOUND, enabled)
+
+AC_MSG_CHECKING(for network support)
+CHECK_ENABLED(network,
+  [--enable-network        Enable network support],
+  USE_NETWORK, enabled)
+
+AC_MSG_CHECKING(for i386 assembly support)
+CHECK_ENABLED(asm386,
+  [--enable-asm386         Enable i386 assembly support],
+  USE_I386_ASSEMBLER, $i386)
+
+AC_MSG_CHECKING(for dynamic loading support)
+CHECK_ENABLED(dyn,
+  [--enable-dyn            Enable dynamic loading],
+  USE_DYN, disabled)
+  
+AC_MSG_CHECKING(for clanGUI support)
+CHECK_ENABLED(gui,
+  [--enable-gui            Enable clanGUI support],
+  USE_GUI, enabled)
+
+AC_MSG_CHECKING(for clanLua support)
+CHECK_ENABLED(lua,
+  [--enable-lua            Enable clanLua support],
+  USE_LUA, $lua)
+
+AC_MSG_CHECKING(for clanMikMod support)
+CHECK_ENABLED(mikmod,
+  [--enable-mikmod         Enable clanMikMod support],
+  USE_MIKMOD, $mikmod)
+
+AC_MSG_CHECKING(for clanPNG support)
+CHECK_ENABLED(png,
+  [--enable-png            Enable clanPNG support],
+  USE_PNG, $png)
+
+AC_MSG_CHECKING(for clanJPEG support)
+CHECK_ENABLED(jpeg,
+  [--enable-jpeg           Enable clanJPEG support],
+  USE_JPEG, $jpeg)
+
+AC_MSG_CHECKING(for clanSmallJPEG support)
+CHECK_ENABLED(smalljpeg,
+  [--enable-smalljpeg      Enable clanSmallJPEG support],
+  USE_SMALLJPEG, enabled)
+
+dnl AC_MSG_CHECKING(for clanMPEG support)
+dnl CHECK_ENABLED(mpeg,
+dnl   [--enable-mpeg           Enable clanMPEG support],
+dnl  USE_MPEG, disabled)
+
+AC_MSG_CHECKING(for clanVorbis support)
+CHECK_ENABLED(vorbis,
+  [--enable-vorbis         Enable clanVorbis support],
+  USE_VORBIS, $VORBIS)
+
+AC_MSG_CHECKING(for clanTTF support)
+CHECK_ENABLED(ttf,
+	[--enable-ttf          Enable clanTTF support],
+	USE_TTF, $TTF)
+
+dnl ----------------------------------------------------
+dnl Which clan subprojects & examples should be compiled?
+dnl ----------------------------------------------------
+
+def_make_targets="clanCore clanSignals clanApp clanDisplay clanSound"
+def_install_targets="installCore installSignals installApp installDisplay installSound"
+
+#NOTE: multiple dependencies are *NOT* dealt with yet!!!!
+
+example_default="AlphaTest Canvas Compiler Directory EventTrigger Example2D Font InputDevices InitDisplay Minimum Mouse Resources ScreenShot Signals SoundBuffer StaticSoundProvider StreamSoundProvider Surface SurfaceProvider ThreadSync PlayCD"
+
+AC_SUBST(example_default)
+
+example_asm=""
+if test "$USE_I386_ASSEMBLER"; then
+	example_asm="Plasma"
+fi
+AC_SUBST(example_asm)
+
+example_opengl=""
+if test "$USE_OPENGL" = "enabled"; then
+	def_make_targets="$def_make_targets clanGL"
+	def_install_targets="$def_install_targets installGL"
+	example_opengl="GL GLLineDemo"
+fi
+AC_SUBST(example_opengl)
+
+example_gui=""
+if test "$USE_GUI" = "enabled"; then
+	def_make_targets="$def_make_targets clanGUI"
+	def_install_targets="$def_install_targets installGUI"
+	example_gui="GUITest GUIEditor GUIGL"
+fi
+AC_SUBST(example_gui)
+
+example_network=""
+if test "$USE_NETWORK" = "enabled"; then
+	def_make_targets="$def_make_targets clanNetwork"
+	def_install_targets="$def_install_targets installNetwork"
+	example_network="NetChannel ClanFTP NetObjects CTalk UDPTunnel NetBrowse"
+fi
+AC_SUBST(example_network)
+
+example_lua=""
+if test "$USE_LUA" = "enabled"; then
+	def_make_targets="$def_make_targets clanLua"
+	def_install_targets="$def_install_targets installLua"
+	example_lua="Lua"
+fi
+AC_SUBST(example_lua)
+
+example_mikmod=""
+if test "$USE_MIKMOD" = "enabled"; then
+	def_make_targets="$def_make_targets clanMikMod"
+	def_install_targets="$def_install_targets installMikMod"
+	example_mikmod="MikMod"
+fi
+AC_SUBST(example_mikmod)
+
+if test "$USE_PNG" = "enabled"; then
+	def_make_targets="$def_make_targets clanPNG"
+	def_install_targets="$def_install_targets installPNG"
+fi
+
+example_jpeg=""
+if test "$USE_JPEG" = "enabled"; then
+	def_make_targets="$def_make_targets clanJPEG"
+	def_install_targets="$def_install_targets installJPEG"
+	example_jpeg="JPEG"
+fi
+AC_SUBST(example_jpeg)
+
+if test "$USE_SMALLJPEG" = "enabled"; then
+	def_make_targets="$def_make_targets clanSmallJPEG"
+	def_install_targets="$def_install_targets installSmallJPEG"
+fi
+
+dnl if test "$USE_MPEG" = "enabled"; then
+dnl	def_make_targets="$def_make_targets clanMPEG"
+dnl	def_install_targets="$def_install_targets installMPEG"
+dnl fi
+
+example_vorbis=""
+if test "$USE_VORBIS" = "enabled"; then
+	def_make_targets="$def_make_targets clanVorbis"
+	def_install_targets="$def_install_targets installVorbis"
+	example_vorbis="Vorbis"
+fi
+AC_SUBST(example_vorbis)
+
+example_ttf=""
+if test "$USE_TTF" = "enabled"; then
+	def_make_targets="$def_make_targets clanTTF"
+	def_install_targets="$def_install_targets installTTF"
+	example_ttf="TTF"
+fi
+AC_SUBST(example_ttf)
+
+AC_SUBST(def_make_targets)
+AC_SUBST(def_install_targets)
+
+dnl ----------------------------------------------------
+dnl Setup libs to be linked with the core library files.
+dnl ----------------------------------------------------
+
+if test "$USE_BEOS" = "enabled"; then
+	libs="-lz -lHermes -lbe -lgame"
+else
+	AC_CHECK_LIB(pthread,main)
+	libs="-ldl -lz -lHermes"
+fi
+
+dnl check wich display targets to build
+
+if test "$USE_X11" = "enabled"; then 
+	disp_x11='$(DISP_X11)'; 
+fi
+if test "$USE_FBDEV" = "enabled"; then 
+	disp_fbdev='$(DISP_FBDEV)'; 
+fi
+if test "$USE_DIRECTFB" = "enabled"; then 
+	disp_directfb='$(DISP_DIRECTFB)'; 
+else
+	directfb_cflags=""; 
+	directfb_libs=""; 
+fi
+dnl if test "$USE_GGI" = "enabled"; then disp_ggi='$(DISP_GGI)'; fi
+
+AC_SUBST(directfb_cflags)
+AC_SUBST(directfb_libs)
+
+AC_SUBST(disp_x11)
+AC_SUBST(disp_fbdev)
+AC_SUBST(disp_directfb)
+AC_SUBST(disp_ggi)
+
+
+AC_SUBST(x_includes)
+AC_SUBST(x_libraries)
+AC_SUBST(extra_includes)
+AC_SUBST(extra_libraries)
+AC_SUBST(libs)
+AC_SUBST(objf_nondyn)
+AC_SUBST(LIBS)
+
+dnl echo $core_libs
+
+dnl ---------------------------------------------------------------------
+dnl Set which extra object files that should be used in case of assembly:
+dnl ---------------------------------------------------------------------
+
+sound_assembly=""
+display_assembly=""
+
+if test "$USE_I386_ASSEMBLER" = "enabled"; then
+  display_assembly='$(OBJF_DISP_INTEL_ASM)'
+  sound_assembly='$(OBJF_SOUND_INTEL_ASM)'
+	small_jpeg_assembly='$(OBJF_JPEG_INTEL_ASM)'
+fi
+AC_SUBST(display_assembly)
+AC_SUBST(sound_assembly)
+AC_SUBST(small_jpeg_assembly)
+
+dnl --------------------
+dnl Check for debug mode
+dnl --------------------
+
+AC_MSG_CHECKING(for debug mode)
+AC_ARG_ENABLE(debug,[  --enable-debug          Enable debugging support],
+[
+  if test "$enableval" == "yes"; then
+    comp_mode="-DDEBUG=1 -g3 -ggdb3 -O0"
+    AC_MSG_RESULT([enabled])
+  else
+    comp_mode="-O2"
+    AC_MSG_RESULT([*********** <-- DISABLED --> ***********])
+  fi
+],
+[
+  comp_mode="-DDEBUG=1 -g3 -ggdb3"
+  AC_MSG_RESULT([enabled])
+])
+
+dnl ----------------------
+dnl Check for profile mode
+dnl ----------------------
+
+AC_MSG_CHECKING(for profile mode)
+AC_ARG_ENABLE(profile,[  --enable-profile	Enable profiling  supprt],
+[
+  if test "$enableval" == "yes"; then
+    comp_mode="-fprofile-arcs -ftest-coverage -pg -g3 -ggdb3 -a -ax"
+dnl support for gcov and gprof
+    AC_MSG_RESULT([************ <-- Enabled --> **************])
+  else
+    AC_MSG_RESULT([disabled])
+  fi
+],
+[
+ AC_MSG_RESULT([disabled])
+])
+    
+AC_SUBST(comp_mode)
+
+dnl --------------------------------------
+dnl Check if BeOS is system
+dnl --------------------------------------
+
+if test "$USE_BEOS" = "enabled"; then
+	objf_system='$(OBJF_BEOS)'
+	link_command='$(CXX) -fPIC -nostart'
+else
+	objf_system='$(OBJF_UNIX)'
+	link_command='$(CXX) -shared -fPIC'
+fi
+
+AC_SUBST(objf_system)
+AC_SUBST(link_command)
+
+dnl ---------------------------------
+dnl Try to locate perl on the system:
+dnl ---------------------------------
+
+AC_MSG_CHECKING(for perl)
+if test -x /bin/perl; then
+	perl_exec="/bin/perl"
+fi
+if test -x /usr/bin/perl; then
+	perl_exec="/usr/bin/perl"
+fi
+if test -x /usr/local/bin/perl; then
+	perl_exec="/usr/local/bin/perl"
+fi
+if test -x perl; then
+	perl_exec = "perl"
+fi
+if test "$perl_exec" = ""; then
+	perl_exec="/usr/bin/perl"
+	AC_MSG_RESULT("no - documentation cannot be compiled")
+else
+	AC_MSG_RESULT("found at $perl_exec")
+fi
+AC_SUBST(perl_exec)
+
+dnl ----------------------------
+dnl ClanLib version information:
+dnl ----------------------------
+
+version_major="2"
+version_minor="0.6.3"
+cl_version="0,6,3"
+
+AC_SUBST(version_major)
+AC_SUBST(version_minor)
+AC_SUBST(cl_version)
+
+dnl ---------------------
+dnl Finish configuration:
+dnl ---------------------
+
+dnl Set installation prefix:
+dnl AC_SUBST(prefix)
+
+AC_OUTPUT( \
+	Makefile \
+	Documentation/Makefile \
+	Documentation/Examples/Makefile \
+	Documentation/Examples/Makefile.conf \
+	Documentation/Utilities/webbuilder.pl \
+	Documentation/Reference/Makefile \
+	Documentation/Tutorial/Makefile \
+	Documentation/Overview/Makefile \
+	Setup/Unix/clanlib-config \
+	Setup/Unix/Makefile.conf \
+	Setup/Unix/Makefile.core \
+	Setup/Unix/Makefile.app \
+	Setup/Unix/Makefile.dep \
+	Setup/Unix/Makefile.display \
+	Setup/Unix/Makefile.sound \
+	Setup/Unix/Makefile.gl \
+	Setup/Unix/Makefile.gui \
+	Setup/Unix/Makefile.lua \
+	Setup/Unix/Makefile.mikmod \
+	Setup/Unix/Makefile.png \
+	Setup/Unix/Makefile.jpeg \
+	Setup/Unix/Makefile.signals \
+	Setup/Unix/Makefile.vorbis  \
+	Setup/Unix/Makefile.network \
+	Setup/Unix/Makefile.ttf \
+	Setup/Unix/Makefile.smalljpeg)
+
+dnl Set file permissions:
+chmod a+x Documentation/Utilities/webbuilder.pl
+chmod 755 Setup/Unix/clanlib-config
+
+echo Building dependencies...please wait.
+make dep > /dev/null 2>&1
+
+echo "---"
+echo "The following projects will be built: $def_make_targets"
+echo ""
+
+echo "Configure done -  type 'make' to compile."
+echo ""

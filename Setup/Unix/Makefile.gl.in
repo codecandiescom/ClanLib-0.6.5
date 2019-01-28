@@ -1,0 +1,35 @@
+#
+# Makefile data for clanGL library.
+#
+
+clanGL: Libs/libclanGL.so Libs/libclanGL.a
+
+installGL: clanGL
+	@for i in `find Sources/API/GL -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/GL -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/gl.h $(INC_PREFIX)/ClanLib/gl.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanGL.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanGL.a $(LIB_PREFIX)
+	@ln -s -f libclanGL.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanGL.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanGL.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanGL.so
+
+OBJF_LIB_GL = Libs/Intermediate/texture_gl.o \
+		Libs/Intermediate/opengl.o \
+		Libs/Intermediate/setupgl_glx.o \
+		Libs/Intermediate/displaycard_glx.o \
+		Libs/Intermediate/displaycard_gl_generic.o \
+		Libs/Intermediate/lockable_surface_gl.o \
+		Libs/Intermediate/blit_gl_generic.o \
+		Libs/Intermediate/glx_target.o
+
+Libs/libclanGL.so: Libs/libclanCore.so $(OBJF_LIB_GL)
+	@echo "Building Libs/libclanGL.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanGL.so.$(D_VERSION_MAJOR) -o Libs/libclanGL.so.$(D_VERSION_MINOR) $(OBJF_LIB_GL) -L Libs -lclanDisplay -lGL -lGLU @x_libraries@  
+	@ln -s -f libclanGL.so.$(D_VERSION_MINOR) Libs/libclanGL.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanGL.so.$(D_VERSION_MAJOR) Libs/libclanGL.so
+
+Libs/libclanGL.a: Libs/libclanCore.a $(OBJF_LIB_GL)
+	@echo "Building Libs/libclanGL.a"
+	-@if [ -e Libs/libclanGL.a ]; then rm -f Libs/libclanGL.a; fi
+	@ar qc Libs/libclanGL.a $(OBJF_LIB_GL)

@@ -1,0 +1,32 @@
+#
+# Makefile data for clanTTF library.
+#
+
+clanTTF: Libs/libclanTTF.so Libs/libclanTTF.a
+
+installTTF: clanTTF
+	@for i in `find Sources/API/TTF -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/TTF -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/ttf.h $(INC_PREFIX)/ClanLib/ttf.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanTTF.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanTTF.a $(LIB_PREFIX)
+	@ln -s -f libclanTTF.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanTTF.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanTTF.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanTTF.so
+
+
+OBJF_LIB_TTF = \
+	Libs/Intermediate/font_ttf.o \
+	Libs/Intermediate/resourcetype_ttf.o \
+	Libs/Intermediate/setupttf.o
+
+Libs/libclanTTF.so: Libs/libclanCore.so $(OBJF_LIB_TTF)
+	@echo "Building Libs/libclanTTF.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanTTF.so.$(D_VERSION_MAJOR) -o Libs/libclanTTF.so.$(D_VERSION_MINOR) $(OBJF_LIB_TTF) -L Libs -lclanCore -lfreetype
+	@ln -s -f libclanTTF.so.$(D_VERSION_MINOR) Libs/libclanTTF.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanTTF.so.$(D_VERSION_MAJOR) Libs/libclanTTF.so
+
+Libs/libclanTTF.a: $(OBJF_LIB_TTF)
+	@echo "Building Libs/libclanTTF.a"
+	-@if [ -e Libs/libclanTTF.a ]; then rm -f Libs/libclanTTF.a; fi
+	@ar qc Libs/libclanTTF.a $(OBJF_LIB_TTF)

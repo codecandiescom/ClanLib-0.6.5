@@ -1,0 +1,93 @@
+#
+# Makefile data for clanGUI library.
+#
+
+clanGUI: Libs/libclanGUI.so Libs/libclanGUI.a
+
+installGUI: clanGUI
+	@for i in `find Sources/API/GUI -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/GUI -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/gui.h $(INC_PREFIX)/ClanLib/gui.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanGUI.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanGUI.a $(LIB_PREFIX)
+	@ln -s -f libclanGUI.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanGUI.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanGUI.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanGUI.so
+
+OBJF_LIB_GUI = \
+	Libs/Intermediate/button.o \
+	Libs/Intermediate/button_default.o \
+	Libs/Intermediate/button_generic.o \
+	Libs/Intermediate/checkbox.o \
+	Libs/Intermediate/checkbox_default.o \
+	Libs/Intermediate/component.o \
+	Libs/Intermediate/component_generic.o \
+	Libs/Intermediate/component_manager.o \
+	Libs/Intermediate/component_manager_generic.o \
+	Libs/Intermediate/component_move_handler.o \
+	Libs/Intermediate/component_resize_handler.o \
+	Libs/Intermediate/component_tokenizer.o \
+	Libs/Intermediate/componentfile_preprocess.o \
+	Libs/Intermediate/messagebox.o \
+	Libs/Intermediate/messagebox_generic.o \
+	Libs/Intermediate/filedialog.o \
+	Libs/Intermediate/filedialog_generic.o \
+	Libs/Intermediate/frame.o \
+	Libs/Intermediate/frame_default.o \
+	Libs/Intermediate/frame_generic.o \
+	Libs/Intermediate/gui_file_parser.o \
+	Libs/Intermediate/gui_manager.o \
+	Libs/Intermediate/gui_manager_generic.o \
+	Libs/Intermediate/inputbox.o \
+	Libs/Intermediate/inputbox_default.o \
+	Libs/Intermediate/inputbox_generic.o \
+	Libs/Intermediate/image.o \
+	Libs/Intermediate/image_default.o \
+	Libs/Intermediate/image_generic.o \
+	Libs/Intermediate/label.o \
+	Libs/Intermediate/label_default.o \
+	Libs/Intermediate/label_generic.o \
+	Libs/Intermediate/layout_manager.o \
+	Libs/Intermediate/layout_manager_generic.o \
+	Libs/Intermediate/listbox.o \
+	Libs/Intermediate/listbox_default.o \
+	Libs/Intermediate/listbox_generic.o \
+	Libs/Intermediate/menunode.o \
+	Libs/Intermediate/menunode_generic.o \
+	Libs/Intermediate/progressbar.o \
+	Libs/Intermediate/progressbar_default.o \
+	Libs/Intermediate/progressbar_generic.o \
+	Libs/Intermediate/popupmenu.o \
+	Libs/Intermediate/popupmenu_default.o \
+	Libs/Intermediate/popupmenu_generic.o \
+	Libs/Intermediate/radiobutton.o \
+	Libs/Intermediate/radiobutton_default.o \
+	Libs/Intermediate/radiogroup.o \
+	Libs/Intermediate/radiogroup_generic.o \
+	Libs/Intermediate/scrollbar.o \
+	Libs/Intermediate/scrollbar_default.o \
+	Libs/Intermediate/scrollbar_generic.o \
+	Libs/Intermediate/setupgui.o \
+	Libs/Intermediate/stylemanager.o \
+	Libs/Intermediate/stylemanager_default.o \
+	Libs/Intermediate/treeitem.o \
+	Libs/Intermediate/treeitem_generic.o \
+	Libs/Intermediate/treeitem_default.o \
+	Libs/Intermediate/treenode.o \
+	Libs/Intermediate/treenode_generic.o \
+	Libs/Intermediate/treeview.o \
+	Libs/Intermediate/treeview_generic.o \
+	Libs/Intermediate/treeview_default.o \
+	Libs/Intermediate/window.o \
+	Libs/Intermediate/window_default.o \
+	Libs/Intermediate/window_generic.o
+
+Libs/libclanGUI.so: Libs/libclanCore.so $(OBJF_LIB_GUI)
+	@echo "Building Libs/libclanGUI.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanGUI.so.$(D_VERSION_MAJOR) -o Libs/libclanGUI.so.$(D_VERSION_MINOR) $(OBJF_LIB_GUI) -L Libs -lclanCore
+	@ln -s -f libclanGUI.so.$(D_VERSION_MINOR) Libs/libclanGUI.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanGUI.so.$(D_VERSION_MAJOR) Libs/libclanGUI.so	
+
+Libs/libclanGUI.a: $(OBJF_LIB_GUI)
+	@echo "Building Libs/libclanGUI.a"
+	@ar qc Libs/libclanGUI.a $(OBJF_LIB_GUI)

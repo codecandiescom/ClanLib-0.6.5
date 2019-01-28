@@ -1,0 +1,261 @@
+ClanLib Releases
+
+Version 0.6.3 - RELEASED (August 5th 2002)
+  - Fixed windows compile bug that sneaked into 0.6.2.
+
+Version 0.6.2 - RELEASED (August 2nd 2002)
+  - DirectFB updates.
+  - Misc minor bug fixes.
+
+Version 0.6.1 - RELEASED (April 7th 2002)
+  - endian fixes in datafilecompiler, targa & wave provider
+  - fixed CXX/CFLAGS not being substituted by configure
+  - updated INSTALL.linux/win32, PATCHES, rpm specs (forgot in 0.6.0)
+  - added UPDTunnel makefile for linux
+  - fix for bug [ 537560 ] X11 fullscreen crash on shutdown
+
+Version 0.6.0 - RELEASED (April 1st 2002) - "April Fools Release"
+  - gui inbox Fixed possible out-of-bounds -1 case for the cursor_position
+    variable.
+  - shared lib version is now 2! (in order to have a 0.5.x & 0.6.x install possible)
+  - rpm spec update for Mandrake 8.2
+  - png provider bugfix (arrays start by 0, not 1)
+  - Stripped down default gui theme (removed unused elements), and moved
+    it into GUIThemeDefault directory.
+  - Added checked_disabled and unchecked_disabled to radiobuttons and checkbuttons-
+    GUI apps using the default theme should now use the new GUIThemeDefault files.
+  - Cleaned up the GUI examples.
+  - some compile fixes and memory leak patches
+  - documentation generation bugfix (filenames with :: now contain __)
+  - !NEW! MSVC will now *automagically* link in the right .lib depending on the ClanLib API files you include
+  - Fixed TreeView open/collapse bug
+  - Added some more functions to nodes and items to make it all more accessible
+  - Fixed radiogroup selection signal
+  - Renamed some classes as well (CL_ListBox_Item -> CL_ListItem ++)
+  - fixing documentation 'uncategorised' classes
+  - repeated building docs will now only generate docs once (because everything already exists ofcourse)
+  - adding signal dependency for examples 
+  - Removed alot of functionality from StyleManager_Default which wasnt used
+  - Fixed SoundSound bug in Configure app
+  - Applied DirectFB patch for DirectFB 0.9.9
+  - Memory debugging fix for ResourceOptions
+  - ClanGUI: adding RadioButtons support
+  - CL_Input fix with get_button(0)
+  - adding annotation support for the docs (for putting on a website with php support)
+  - OpenGL get_proc_address (linux & win32). 
+  - Fixed the ASM problem reported by Filip.
+  - Configure App fixes for generating installation batchfiles (per 'module')
+  - DirectSound recording support.
+  - Added some ClanGUI component constructors to make them more consistent
+  - Updated the gui-status file
+  - Components now only respond to left mouse button and not all
+  - Changed the input signals in clanGUI again - sorry guys, but
+    this really cleaned it up to the better - read README.upgrade
+    as usual for more specifics
+  - applying darryl's memory leak bugfixes + some small memory
+    leaks / uninitialised memory reads we found
+  - More font updates, for those that dont read everything in detail.
+  - CL_Component: Changes sig_key_up/down to only handle keyboard
+  - CL_Component: Added sig_input_up/down
+  - ClanGUI: CL_ScrollBar - Fixed scrolling bug
+  - ClanGUI: CL_ScrollBar - Fixed resize bug
+  - ClanGUI: Updated component-status (readme.gui)
+  - Moved streamed soundprovider sessions to clanSound mixing thread.
+    This should make music continue to play during loading and other cases
+    where CL_System::keep_alive() is not heart-beat often enough.
+  - ClanGUI: Improved mouse capture code
+  - ClanGUI: small linux fix for snprintf
+  - ClanGUI: Added new CL_Window constructor (without size)
+  - Fixed component_at: now searching from top-level components and down
+  - sig_mouse_down/up are now signalled
+  - applied [ #485196 ] X11 keypad support
+  - Partly/manually applied [ #484817 ] makefile (distclean) patches
+  - small cleanup of Makefiles
+  - ClanGUI: Slightly different lost_focus behaviour
+  - Made all signals consistent - please read README.upgrade for more specific info.
+  - Updated signals & slots overview with CL_SlotContainer and misc
+  - Fixed some input bugs where some signals werent signalled.
+  - Applied buffer overrun patch
+
+Version 0.5.4, January 22 2002
+  - Datafile & resource fixes (Everything should work again with datafiles!)
+  - Added a CL_Setup???::init(bool register_resources_only = false)
+    which makes it possible to compile datafiles without initializing the devices (display, sound, etc).
+  - CL_Font::print_center and print_right is now also multi-line enabled
+  - Fullscreen possible under GLX
+  - Win32 CL_System::get_time() performance fix
+  - X11 put_display fix
+  - ClanTTF: Compile fix
+  - ClanPNG: is_indexed() in PNG-files now return correct value
+  - ClanNet: Backported sockets from ClanNet2 (fixes some bugs)
+  - ClanGUI: Added "tab next" support
+  - ClanGUI: Added "tab id" support
+  - ClanGUI: Fixed automatic sizing of CL_CheckBox
+  - ClanGUI: Fixed keyboard and mouse event routing.
+  - ClanGUI: Removed many memory leaks from components
+
+Version 0.5.3, January 10 2002
+  - Fixed resource path bug introduced in 0.5.2
+  - Default videomode is windowed, and not fullscreen.
+  - Resource-overview updates
+  - Linux configure fix
+  - Fixed CL_DirectoryScanner
+  - ClanPNG Makefile fix for installing
+
+Version 0.5.2, January 08 2002
+  - Fixed CL_TreeView
+  - Added set_text(num) to CL_InputBox
+  - Fixed CL_Sleep() in Linux
+  - Added support for thread null handles
+  - Removed CL_CreateSlot
+  - Many many updates to GUIEditor example
+  - New GUI overview
+  - Added raw datatype input source interface
+  - Allowed resource inheritance from other resource managers
+  - Added CL_SlotContainer
+  - GUI Reference documentation updates
+  - Replaced 'const char *' with 'std::string &' all over clanlib.
+    NOTE: this breaks binary API compatibility with previous 0.5.x binaries
+  - Added typesafe get_component template function (for GUI)
+  - Fixed msvc++ configure.
+  - Added datatype enum to componentype options
+  - memory leak fixes (unix display)
+  - clanLua fixes (requires tolua to be present + added more detailed explanation)
+  - Eventtrigger (bugfix + make assignments of CL_EventTrigger safe)
+  - removed CL_MPEG
+  - GCC 3 fixes
+  - DDFLIP_VSYNC only enabled on versions of DX that has the flag.
+  - added directory scanner API & first implementation (win32 & unix)
+  - CL_Button in ClanGUI now only activates on space and mouse
+  - CL_InputDevice::get_type() added
+  - Added CL_SetupCDAudio.
+  - Fixed horiz/vert flipping.
+  - ClanNetwork: leave and rejoin now throws exceptions as join does.
+  - DirectDraw DDFLIP_NOVSYNC flag support in flip_display() (Enabled if using DirectX 8).
+  - Much more precise CL_System::get_time() timer.
+  - Added directory scanner API.
+  - Added CL_SetupVorbis.
+  - Fixed redirect console stuff for Borland.
+  - Added IPv6 support for clanNetwork. Just define IPV6 and you're good to go.
+    This should be noted as a development only feature. (Who has got IPV6 anyway?)
+  - Added experimental clanJavaScript.
+  - ClanSound volume fix.
+  - Fixed inputsource file provider path issues.
+  - Added resource locations to be relative to resource file.
+    (See also README.upgrade for more info!).
+  - CL_ListBox fixes (multiselection, trigger bug on empty lists).
+  - Significant updates to ClanFTP, much more robust now.
+  - Fixed CL_Surface resource unloading. 
+  - Memory leak fixes (font ttf, generic resource font, surface, resource manager, display target, console window,
+    input mouse, setupdisplay windows).
+  - Win32 install doc added linkage troubleshooting.
+  - Fixed bug [ #472042 ] mikmod example never exits
+  - Fixing [ #472571 ] can't turn off mikmod reverb, by disabling
+    mikmod reverb by default.
+  - Redhat spec update
+  - Borland C++ fixes (typecasts, etc, Makefile generator)
+  - NetObjects example update (send team info upon connect, voodoo replication,
+    LobbyPlayer, no team switch after ready player, uninited players, 
+    return to lobby in game, auto-join least populated team, correct replication,
+    force set name before join, cleanup - STILL NOT PLAYABLE, THOUGH)
+  - Reference documentation (small fix).
+  - fixed bugs in CL_NetComputer_Host and CL_UniformSocket get_address() 
+    and get_port() not giving correct address and port.
+  - DirectFB patch applied.
+
+Version 0.5.1, November 01 2001
+  - moved Mandrake spec to seperate RPM/Mandrake directory
+  - added NetObjects TODO
+  - fixed nvidia GL detection (test program linker error pthread)
+  - disabled win32 clanLua & examples support for 0.5.2
+  - Resource manager fixes (ASCII, tolower,etc)
+  - Overview index update
+  - GUI overview updates
+  - Applied Harrys GLX patch
+  - Start of a new overview: Signals & Slots
+  - NetObjects added a wormhole (eyecandy + source) 
+  - NetObjects added placeholder intro with some placeholder sounds (thanks to
+    XenoHammer project)
+  - more docpatches
+  - NetObjects new inputbox gfx + README update from mbn
+  - more NetObjects work (waitingroom is now Lobby, chatting works, etc)
+  - CL_Target updates to fix flip_horiz/vert.
+  - Fixed 'internal compiler error' issue with msvc++. CL_ThreadFunc_v0..3 are
+    now macroes instead of template functions.
+  - mbn added 15 new bugs
+  - fixed listbox::set_top_item check range & update scrollbar -> 
+    still some other strange drag & drap scrollbar problem exists
+  - spec updates (building GL rpm, etc)
+  - NetObjects example has completely new GUI look & feel
+  - NetObject example work (speed update, added initial waitingroom, 
+    additional control style implementations)
+  - fixed GUI scrollbar 
+  - fixed win32 playcd not playing CD
+  - fixed bug [ #471387 ] canvas sample doesn't display correctly
+  - Resources are no longer case-sensitive. Fixes bug #460036
+  - PCX transparency works fine: Bug #463883
+  - bugfix in ClanTTF causing crash in destruction
+  - MAJOR example updates (makefiles, readmes, comments, warnings, etc.. 
+    etc.., too much to summarize - see Changelog on what happened today) 
+  - added spec files for redhat, mandrake and conectiva
+  - applied some patches from mandrake RPMS
+  - Added CL_Socket.input and CL_Socket.output
+  - fix for network reference bug
+  - fixed several gcc warnings
+  - png example added
+  - documentation makefile updates
+  - lots of Network documentation updates
+  - Initial CL_ThreadFunc stuff.
+  - New DSP: CompileAll, which compiles all modules (easy for testing :)
+  - Documentation updates for 0.5.1
+  - Fixes for PCE2 choking when parsing some classes.
+  - Main doc page update
+  - FAQ update
+  - added GUI TreeView
+  - Fixed nasty memory leak in static soundbuffers.
+  - fixed bug [ #462039 ] ClanFTP build broken in win32
+  - BPR makefile generator sucks much less now.
+  - applied patch [ #465837 ] win32 - makes keypad keys available
+  - Added push-back support for socket class.
+  - applied patch [ #464890 ] fix for bug 464261(win32 joysticks)
+  - applied patch [ #464893 ] fix for bug 464889 (win32 argv)
+  - screenshot example with png support
+  - added readmes for several examples (more should follow)
+  - mous example bugfix 
+  - more documenting patches
+  - fixed bug [ #462040 ] MikMod exampel fails to build 
+  - fixed bug [ #462049 ] streamsoundprovider crashes on exit 
+  - borland makefile generator rewrite
+  - more documentation updates
+  - vector rewrite
+  - random iterator optimizations
+  - (win32) added clanDisplay precompiled header support	
+  - (win32) example intermediate files are not shared any mor
+  - fixes in (clanlib) mikmod & friends
+  - fixed eventlistener
+  - debian build fixes
+  - fixed memory input source bug
+  - lots of documentational updates (generating reference docs, etc)
+  - borland updates
+  - fixed linux network compile problem
+  - lots of updates in CTalk example 
+    NOTE:: [HERMES_CVS] bugfixes -> need to update hermes news & build new snapshots!!!
+  - fixed network memory leak
+  - added net socket overview documentation
+  - ClanFTP & example has been added (clanNetwork)
+  - browsemaster/connection implementation (clanNetwork)
+  - NetBrowse example added (Documentation/Examples)
+  - inputsource provider path fixes (clanCore)
+  - NetVariables added (clanNetwork)
+  - FreeBSD cd audio fix (clanSound)
+  - some small OST (Nokia Media Terminal) patches
+  - soundbuffer session reference counting added (clanSound)
+  - misc control improvements (clanGUI)
+  - filedialog improvements - works in unix too now (clanGUI)
+  - DirectFB display target added (clanDisplay)
+  - network improvements (clanNetwork)
+  - more consistency across examples (Documentation/Example)
+  - Resource management improvements (clanCore)
+
+Version 0.5.0, April 28 2001
+  - official development release of the 0.5.x tree

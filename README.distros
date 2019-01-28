@@ -1,0 +1,13 @@
+Hello distribution maker,
+
+If you happen to make any patches to these sources and think they should be
+incorporated in our next release, don't hestitate to let us know.. we would
+gladly apply any patches that improve ClanLib.
+
+note that there are several rpm specs in Setup/Unix/ 
+(for the different distributions)
+
+best regards,
+
+	The ClanLib Team
+	(www.clanlib.org)

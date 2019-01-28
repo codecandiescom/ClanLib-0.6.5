@@ -1,0 +1,121 @@
+section Window
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	font_disabled = fonts/font_gray.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section Button
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	font_disabled = fonts/font_gray.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section InputBox
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	font_disabled = fonts/font_gray.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section Label
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section ListBox
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}
+
+section CheckBox
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	sur_checked = checkbox/checked.tga (type=surface);
+	sur_unchecked = checkbox/unchecked.tga (type=surface);
+	sur_checked_disabled = checkbox/checked_disabled.tga (type=surface);
+	sur_unchecked_disabled = checkbox/unchecked_disabled.tga (type=surface);
+}
+
+section RadioButton
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+	sur_checked = radiobutton/checked.tga (type=surface);
+	sur_unchecked = radiobutton/unchecked.tga (type=surface);
+	sur_checked_disabled = radiobutton/checked_disabled.tga (type=surface);
+	sur_unchecked_disabled = radiobutton/unchecked_disabled.tga (type=surface);
+}
+
+section TreeViewItem
+{
+	font = fonts/font_black.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+}

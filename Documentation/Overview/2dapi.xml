@@ -1,0 +1,133 @@
+<xml>
+<head>
+<title>ClanLib 2D API - Overview</title>
+<eyecolor>yellow</eyecolor>
+</head>
+<body>
+
+<p>Displaying 2D graphics, setting a videomode and drawing on 
+the screen are very basic features of any game. The ClanLib
+2D api provides support for this and several other things, 
+including;</p>
+<ul>
+<li>Setting a videomode</li>
+<li>Clearing the screen</li>
+<li>Drawing sprites</li>
+<li>Drawing lines/rectangles</li>
+<li>Clipping</li>
+<li>Printing text</li>
+<li>Modifying sprites</li>
+</ul>
+
+<h3>The CL_Display class</h3>
+
+<p>The CL_Display class is the main class in the 2d graphics subsystem
+of ClanLib. All functions in the CL_Display class are static, so you 
+don't have to keep a pointer to an instance of CL_Display. You can use 
+CL_Display for setting a videomode by calling CL_Display::set_videomode().
+You can flip the display (switching between backbuffer and frontbuffer)
+by calling CL_Display::flip_display(), clear the display by calling
+CL_Display::clear_display(), retrieve screen dimensions, modify the clipping 
+stack which controls what gets drawn on the screen and draw rectangles and lines
+by calling CL_Display::fill_rect() and CL_Display::draw_line().</p>
+
+<p>ClanLib has integrated support for supporting multiple displaycards/monitors.
+The CL_Display class is actually just routing calls to the currently selected 
+displaycard. This system is used throughout ClanLib, so you can add multimonitor 
+support to your game in no time; by adding a few lines changing between monitors
+in single location in your game.</p>
+
+<p>All ClanLib display primitives, including lines, rectangles, surfaces and fonts
+have built-in support for alpha-blending. Always keep in mind that alpha blending is
+very slow (you should consider using OpenGL if you use alot of alpha blending), and
+that alpha-values in ClanLib go from 0.0 as being totally transparent, to 1.0 being
+totally opaque.</p>
+
+<h4>The clipping stack</h4>
+<p>Sometimes it's practical to limit the drawing of items to a specific area of the screen.
+ClanLib always uses the screen boundary as a clipping rectangle, so you never have
+to worry about showing objects outside the screen - just call the show-function and
+they are trivially rejected by the clipper. Like many other clipping systems, the
+ClanLib clipping system uses a stack principle. It's not possible to create polygonal
+clipping areas this way. Instead, if you push a new clipping rectangle upon the clipping stack,
+the single clipping rectangle used to clip further graphics is defined as the area shared
+by the previous clipping rectangle and the newly pushed one (the intersection).
+The previous clipping rectangle is stored and brought back to use when the clipping rectangle
+in action is pop'ed off the clipping stack. However, it's also possible to set the clipping rectangle
+in absolute terms, disregarding any previous clipping rectangles.</p>
+
+<h3>Surfaces in ClanLib</h3>
+<p>One very used aspect in any game is drawing 2D images. To do this,
+ClanLib provides three lowlevel interfaces:</p>
+
+<ul>
+<li>CL_Target</li>
+<li>CL_Surface</li>
+<li>CL_SurfaceProvider</li>
+</ul>
+
+<h4>Targets</h4>
+
+<p>The CL_Target class in ClanLib represents some image data that can be
+accessed and modified.</p>
+
+<p>To access the memory, you must call CL_Target::lock() and then afterwards
+use CL_Target::get_data() to get a pointer to the image data. When you are
+done modifying the image, you must call CL_Target::unlock().</p>
+
+<p>Besides the above data access mechanism, the CL_Target interface also
+contain a set of commonly used drawing functions. Examples of this is
+drawing lines, boxes and blitting from target to target. All of those
+functions respect the clipping functions also included in CL_Target.</p>
+
+<p>To implement your own target, you have to inherit all the abstract
+functions and implement them - but in most cases you will probably prefer to
+use the CL_Canvas implementation. It simply creates a target in the size and
+format that you specify in the constructor.</p>
+
+<h4>Surfaces</h4>
+
+<p>In order to draw images to the screen, you have to load them into a
+surface. A surface analyzes and stores the image in a format more suitable
+for the graphics card. This is done to maximize the performance and take
+advantage of whatever technology a platform offers.</p>
+
+<p>A surface loads its image data from a surface provider. A surface
+provider is actually just a CL_Target with some additonal functions that
+describe how it should blit this data. For instance, a surface provider also
+contain a function that describe if one of the colors in the image is
+transparent (source colorkey), and should be handled as transparent when
+being blitted.</p>
+
+<p>It is not possible to access the data in a surface. If you need to alter
+the data in a surface, change it using the CL_Target and CL_Canvas interfaces
+and reload it into the surface. Unlike most surfaces in other 2D libraries,
+we simply do not allow this because we need the freedom to store the image
+in whatever format(s) that suits the platform. This is done for performance
+reasons, and allows us to upload the surface to Pixmap, OpenGL textures and
+seperate alpha from the other color components in an image.</p>
+
+<p>On some platforms it can be a rather expensive thing to create or reload
+a surface. This can either be caused by our image analysis or the display
+target being used. For images that changes frequently, you may want to use a
+dynamic surface instead (use CL_Surface::create_dynamic() instead of
+CL_Surface::create()). The difference is that a dynamic surface doesn't
+analyze the image, and doesn't try to store it in a smarter format. A
+dynamic surface will instead access the surface provider in every blit and
+just try to draw it as quickly as possible.</p>
+
+<p>The downside of dynamic surfaces is that if you draw an image often
+without changes, it will be significantly slower.</p>
+
+<h4>Fonts in ClanLib</h4>
+<p>ClanLib has built-in support for fonts. Using fonts starts with the CL_Font 
+class. Like surfaces, fonts are loaded from image files. Consult the reference
+documentation to see how you get your font loaded. When loaded, fonts can be 
+shown using functions the CL_Font class that provides support for drawing fonts
+left- and right-aligned as well as centered. ClanLib also supports true type fonts
+through the ClanTTF library (not a part of clanCore).</p>
+<p>If you want more information about fonts, have a look at 
+the <a href="font_overview.html">font overview</a>.</p>
+
+</body>
+</xml>

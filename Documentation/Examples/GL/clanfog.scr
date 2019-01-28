@@ -1,0 +1,3 @@
+sphere = sphere.tga (type=surface);
+fog = fog.tga (type=surface);
+floor = floor.tga (type=surface);

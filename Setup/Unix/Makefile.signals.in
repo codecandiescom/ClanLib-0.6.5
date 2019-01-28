@@ -1,0 +1,10 @@
+#
+# Makefile data for clanSignals library.
+#
+
+clanSignals:
+
+installSignals: clanSignals
+	@for i in `find Sources/API/Signals -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Signals -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/signals.h $(INC_PREFIX)/ClanLib/signals.h

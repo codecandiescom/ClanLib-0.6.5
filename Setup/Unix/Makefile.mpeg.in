@@ -1,0 +1,29 @@
+#
+# Makefile data for clanMMPEG library.
+#
+
+clanMPEG: Libs/libclanMPEG.so Libs/libclanMPEG.a
+
+installMPEG: clanMPEG
+	@for i in `find Sources/API/MPEG -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/MPEG -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/mpeg.h $(INC_PREFIX)/ClanLib/mpeg.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanMPEG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanMPEG.a $(LIB_PREFIX)
+	@ln -s -f libclanMPEG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanMPEG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanMPEG.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanMPEG.so
+
+OBJF_LIB_MPEG =	\
+	Libs/Intermediate/mpeg_soundprovider.o
+
+Libs/libclanMPEG.so: Libs/libclanCore.so $(OBJF_LIB_MPEG)
+	@echo "Building Libs/libclanMPEG.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanMPEG.so.$(D_VERSION_MAJOR) -o Libs/libclanMPEG.so.$(D_VERSION_MINOR) $(OBJF_LIB_MPEG) -L Libs -lclanCore 
+	@ln -s -f libclanMPEG.so.$(D_VERSION_MINOR) Libs/libclanMPEG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanMPEG.so.$(D_VERSION_MAJOR) Libs/libclanMPEG.so
+
+Libs/libclanMPEG.a: $(OBJF_LIB_MPEG)
+	@echo "Building Libs/libclanMPEG.a"
+	-@if [ -e Libs/libclanMPEG.a ]; then rm -f Libs/libclanMPEG.a; fi
+	@ar qc Libs/libclanMPEG.a $(OBJF_LIB_MPEG)

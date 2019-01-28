@@ -1,0 +1,313 @@
+$Id: INSTALL.win32,v 1.25 2002/04/05 19:27:54 japj Exp $
+
+Readme file for ClanLib 0.6.x under Win32
+---------------------------------------------------------------------------
+This readme will guide you with installing, compiling ClanLib and creating
+your first ClanLib application.
+
+If you have downloaded the binaries, you can skip section 3 and 4.
+
+1. Getting started
+2. Preparing installation
+3. Configuring ClanLib
+4. Compiling ClanLib
+5. Creating applications with ClanLib
+6. Creating a workspace for your application
+7. Linking troubleshooting
+
+
+1. Getting started
+---------------------------------------------------------------------------
+You need Microsoft Developer Studio 6.0 with MFC installed to follow this
+installation guide (see INSTALL.borland for Borland specific instructions).
+
+Go to http://clanlib.org/download/foreign-win32.html and download at least
+the zlib and Hermes multithreaded libraries. If you need more functionality
+in ClanLib, you can download those other libraries you need.
+
+Install these libraries in a directory - remember which one, because you
+need to enter that information in the next section.
+
+
+2. Preparing installation
+---------------------------------------------------------------------------
+The first step in using ClanLib under Windows is to setup a sane build
+environment. This involves two things:
+
+1. ClanLib must be able to locate the libraries it uses.
+2. ClanLib must know where to install itself.
+
+My personal build environment is setup as follows:
+(You don't need to follow the same scheme, put your libraries where
+it fits you).
+
+"c:\My Documents\lib" contains all .lib files that didn't come along with
+msvc++ and that are needed by ClanLib.
+
+"c:\My Documents\include" contains all include files needed by the libs.
+
+Here is how it looks like after I've installed Hermes and Zlib:
+
+c:\My Documents\lib\Hermes.lib
+c:\My Documents\lib\zlib.lib
+
+c:\My Documents\include\zlib.h
+c:\My Documents\include\zconf.h
+c:\My Documents\include\Hermes\Hermes.h
+c:\My Documents\include\Hermes\H_Blit.h
+c:\My Documents\include\Hermes\H_Clear.h
+c:\My Documents\include\Hermes\H_Config.h
+c:\My Documents\include\Hermes\H_Conv.h
+c:\My Documents\include\Hermes\H_Format.h
+c:\My Documents\include\Hermes\H_Pal.h
+c:\My Documents\include\Hermes\H_Types.h
+
+You must configure Visual C++ so it knows where to find the include and 
+library files. This is done through the Tools menu, the Options... item.
+Select the Directories tab, and fill in the include directory
+("c:\My Documents\include") under the Include Files listbox,
+and the library directory ("c:\My Documents\lib") under the Library Files
+listbox.
+
+
+3. Configuring ClanLib
+---------------------------------------------------------------------------
+A freshly downloaded ClanLib source package will only include one workspace
+and project: configure.dsw. This is a little MFC configuration tool that
+will generate the real ClanLib workspace and project files.
+
+You have to compile and run this wizard and answer its questions carefully.
+Incorrect information will give you problems during the compilation.
+
+When the configure wizard asks me where to install the header and library
+files, I specify those paths from section 2 (C:\My Documents\include and
+C:\My Documents\lib).
+
+When this is done, open the ClanLib.dsw file.
+
+
+4. Compiling ClanLib
+---------------------------------------------------------------------------
+After loading ClanLib.dsw, the project view will show many different
+projects; clanApp, clanCore, clanDisplay, Example2D, ExampleCanvas etc...
+
+Start with making clanCore the active project, if its not active already.
+You do this by right-clicking it, and select 'Set as Active Project'.
+Select Debug or Release in the toolbar. If you can't find this option
+anywhere, right click on the toolbar, and make sure Build is selected,
+and deselect the Build Minibar. Press F7 to compile the active project.
+
+You need to compile at least these projects:
+- ClanApp
+- ClanCore
+- ClanDisplay
+
+Optionally, you can compile the others if you need them.
+
+You'll get some warnings for the different projects, similar to:
+
+   ddraw.lib(DDRAW.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already
+   defined in winmm.lib(WINMM.dll); second definition ignored
+
+   GLU32.lib(GLU32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already
+   defined in OpenGL32.lib(OPENGL32.dll); second definition ignored
+
+   LINK : warning LNK4098: defaultlib "LIBCMT" conflicts with use of other
+   libs; use /NODEFAULTLIB:library
+
+Ignore these warnings, they are not important.
+
+After a successful compilation of ClanLib, it will automatically run a batch
+file that will install all headers and lib files in the path you specified
+in the wizard. In my case, that is "c:\My Documents\lib" and "c:\My
+Documents\include". So the following files will be added:
+
+c:\My Documents\lib\clanCore.lib
+c:\My Documents\lib\clanCored.lib
+c:\My Documents\lib\clanGL.lib
+c:\My Documents\lib\clanGLd.lib
+
+c:\My Documents\include\ClanLib\core.h
+c:\My Documents\include\ClanLib\gl.h
+...
+
+
+5. Creating applications with ClanLib
+---------------------------------------------------------------------------
+For each library in ClanLib, we produce two .lib files, eg clanCore.lib and
+clanCored.lib. The first one is for release versions of your game, and the
+second is for debug versions.
+
+The debug version includes debugging information in the library itself (so
+if the lib crashes, you can see the source code - and then it creates a
+debug console window that you can use to write useful information (using
+std::cout or printf).
+
+Note that MSVC will know what .lib file to link into your application, based
+upon the ClanLib headers you include in your application.
+
+Example:
+	If you include <ClanLib/core.h> then depending on wether you are building
+	release or debug binaries the clanCore.lib or clanCored.lib will be
+	automagically linked into your executable. 
+
+
+6. Creating a workspace for your application
+---------------------------------------------------------------------------
+ 1.  Select File->New...
+ 2.  Select Projects->Win32 Application, and specify where you want it located.
+ 3.  Select "An empty project", and press OK till you're finished with the wizard.
+ 4.  Select Project->Settings...
+     Notice there are several configurations in which you can modify settings.
+     Normally, these are 'Win32 Debug' and 'Win32 Release'. You switch between
+     these in the 'Settings for:' droplist. 
+     In section 5 and 6 below, you need to modify both these settings
+     (sections a for release setting, and sections b for debug settings).
+ 5.  Select the 'C/C++' tab, and then Category 'Code Generation'
+ 5a. For Release version, change the 'Use run-time library' to Multithreaded.
+ 5b. For Debug version, change the 'Use run-time library' to Debug Multithreaded.
+ 6.  Select Project->Add To Project->New...
+ 7.  Select C++ Source File, and enter a name for the file, for example 'app.cpp'
+ 8.  Enter a skeleton for your code:
+
+#include <ClanLib/core.h>
+#include <ClanLib/application.h>
+#include <ClanLib/display.h>
+
+class MyApp : public CL_ClanApplication
+{
+public:
+	// This function returns the name of your game
+	virtual char *get_title()
+	{
+		return "Hello World!";
+	}
+
+	virtual int main(int argc, char **argv)
+	{
+		// Create a console window for text-output if not available
+		// Use printf or cout to display some text in your program
+		CL_ConsoleWindow console("Console");
+		console.redirect_stdio();
+
+		try
+		{
+			// Initialize ClanLib base components
+			CL_SetupCore::init();
+
+			// Initialize the ClanLib display component
+			CL_SetupDisplay::init();
+
+			// Set a videomode - 640x480x16bpp
+			// false means that this program should not run full-screen
+			CL_Display::set_videomode(640, 480, 16, false);
+
+			// Run until someone presses escape
+			while (!CL_Keyboard::get_keycode(CL_KEY_ESCAPE))
+			{
+				// Clear the display in a dark blue nuance
+				// The four arguments are red, green, blue and alpha
+				// All color nuances in ClanLib are measured in the interval 0->1
+				CL_Display::clear_display(0.0f, 0.0f, 0.2f, 1.0f);
+
+				// Flip the display (using a double-buffer),
+				// showing on the screen what we have drawed
+				// since last call to flip_display()
+				CL_Display::flip_display();
+
+				// This call updates input and performs other "housekeeping"
+				// call this each frame
+				CL_System::keep_alive();
+		
+				// Give the CPU a rest to catch up
+				CL_System::sleep(10);
+			}
+
+			// De-Initialize the ClanLib display component
+			CL_SetupDisplay::deinit();
+
+			// De-Initialize ClanLib base component
+			CL_SetupCore::deinit();
+		}
+		// Catch any errors from ClanLib
+		catch (CL_Error err)
+		{
+			// Display the error message
+			std::cout << err.message.c_str() << std::endl;
+		}
+
+		// Display console close message and wait for a key
+		console.display_close_message();
+
+		return 0;
+	}
+} app;
+
+7. Linking troubleshooting
+---------------------------------------------------------------------------
+
+>    libcpmtd.lib(xmbtowc.obj) : error LNK2001: unresolved external symbol
+>    __CrtDbgReport
+
+>    Because I've noticed that there are different configurations...I'm
+>    currently using "Win 32 Debug"...should this instead be "Win 32
+>    release" ?
+
+You are mixing debug libraries with release libraries.
+
+The Project Settings menu, which is probably the most crappy part of msvc++,
+is great at hiding differences between your different Configurations/Targets
+- so you may have a hard time tracking it down, but basically this is how it
+should be:
+
+When linking release builds, you are not allowed to link a debug library.
+This is because debug builds use different memory allocators and stuff that
+makes it easier to detect buffer overruns and memory leaks. __CrtDbgReport
+are one of these functions. It is defined in the C runtime library - but
+_only_ in the debug version of it.
+
+You select which runtime library you want to use in "C++/Code Generation/Use
+run-time library". It is essential that ALL libraries you link with use the
+same run-time library. If they do not, you will get a warning in light
+cases, and a unresolved external symbol in the medium case, and an
+application crashing appearently random in the severe case.
+
+Microsoft libraries use a special naming convention, that makes it possible
+for you to determine what version it is linking with, based on its filename.
+For example:
+
+C Run-Time Library:
+LIBC.LIB    - Single threaded, static link
+LIBCD.LIB   - Single threaded, static link, debug
+LIBCMT.LIB  - Multithreaded, static link
+LIBCMTD.LIB - Multithreaded, static link, debug
+MSVCRT.LIB  - Multithreaded, dynamic link
+MSVCRTD.LIB - Multithreaded, dynamic link, debug
+
+Standard C++ Library:
+LIBCP.LIB    - Single threaded, static link
+LIBCPD.LIB   - Single threaded, static link, debug
+LIBCPMT.LIB  - Multithreaded, static link
+LIBCPMTD.LIB - Multithreaded, static link, debug
+MSVCPRT.LIB  - Multithreaded, dynamic link
+MSVCPRTD.LIB - Multithreaded, dynamic link, debug
+
+As you might have noticed yourself, MT = multi threadded, D = debug.
+
+The clanlib library files use the same policy regarding debug - there is
+clanCore.lib and clanCored.lib, clanDisplay.lib and clanDisplayd.lib, etc.
+Make sure you use the correct ones for debug and release configurations in
+the project settings menu. Also make sure that you link up with the
+Multihreadded LIBCMT.lib and Multithreadded debug LIBCMTD.lib libraries.
+
+If you continue to get a linker error, it is because of other library files
+you link with. This can basically be any of the libs clanlib use: Hermes,
+libjpeg, mikmod, etc. If you built these themselves, you might have built
+them in debug versions (or wrong run-time library), and that could cause
+your linker problems.
+
+--
+
+> "LIBCMT.lib(crt0.obj) : error LNK2001: unresolved external symbol _main"
+
+Make sure you've created a Win32 Application, and NOT a Console application.

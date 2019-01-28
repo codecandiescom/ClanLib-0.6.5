@@ -1,0 +1,21 @@
+prefix=@prefix@
+
+EXAMPLE_SRC_PREFIX = $(prefix)/doc/ClanLib-docs-@version_minor@/Examples
+
+EXAMPLES= @example_default@ @example_asm@ @example_opengl@ @example_gui@ @example_network@ @example_lua@ @example_mikmod@ @example_jpeg@ @example_vorbis@ @example_ttf@ 
+
+all: 
+	for i in $(EXAMPLES); do echo Building $$i example; cd $$i; make all; cd ..; done
+
+static:
+	for i in $(EXAMPLES); do echo Building $$i example as static; cd $$i; make static; cd ..; done
+
+clean:
+	for i in $(EXAMPLES); do cd $$i; make clean; cd ..; done
+
+distclean:
+	for i in $(EXAMPLES); do cd $$i; make distclean; cd ..; done
+	rm -f Makefile Makefile.conf
+
+install:
+#copy all example sources (+Makefile & Makefile.conf from the current directory to the EXAMPLE_SRC_PREFIX directory

@@ -1,0 +1,450 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="FAQ.xsl"?>
+
+<faq>
+
+<title>Frequently Asked Questions about the ClanLib Library</title>
+<version>$Id: FAQ.xml,v 1.14 2002/04/07 11:00:04 sphair Exp $</version>
+
+<h1>Frequently Asked Questions about the ClanLib Library</h1>
+
+<p>This document tries to answer questions a user might have when installing and
+using ClanLib. Please make sure you read this before sending questions or bug
+reports to the maintainers.</p>
+
+<p>If you have any questions you think should be answered in this document, or find
+any errors or outdated information, please read the README document to find out where
+to direct your questions.</p>
+
+<section title="Compiling under Linux">
+	<item>
+		<question>When I try to compile ClanLib, I get errors regarding that try, catch and throw are reserved C++ keywords.</question>
+		<question>My C++ compiler wants exceptions to be enabled with -fhandle-exceptions.</question>
+		<question>I get an "Internal compiler error" message from my C++ compiler.</question>
+		<answer>Try upgrading your compiler to a newer version.</answer>
+	</item>
+	<item>
+		<question>When compiling it complains that it cannot open shared object libclanCore...
+	  		<detail>
+				error in loading shared libraries: libclanCore.so.0: cannot open shared object file: No such file or directory
+			</detail>
+		</question>
+		<answer>
+			Chances are you installed the ClanLib libraries into /usr/local/lib, but
+		      /usr/local/lib isn't present in the /etc/ld.so.conf. You can choose to
+		      install in a directory that IS present in /etc/ld.so.conf or choose to add
+		      /usr/local/lib to /etc/ld.so.conf. Remember to run ldconfig as root afterwards.
+		</answer>
+	</item>
+	<item>
+		<question>I'm using PGCC, and I get error while compiling a file called virtch.c.</question>
+		<question>I'm using Mandrake 6.x or earlier, and I get error while compiling a file called virtch.c.</question>
+		<answer>Open Setup/Unix/makefile.conf, search for -O3 and replace it with -O6.</answer>
+	</item>
+	<item>
+		<question>I'm using SuSE and am getting warnings about multiple common of...
+			<detail>
+				obj/Input.o: warning: multiple common of 'CL_InputAxis type_info node'
+				/usr/local/lib/libclan.so: warning: previous common is here
+			</detail>
+		</question>
+		<answer>
+		      To get rid of those annoying "multiple common..." warnings edit 
+		      /usr/lib/gcc-lib/i486-linux/egcs-???/specs. 
+
+				*lib
+				-warn-common%{share....
+
+			should be:
+
+				*lib
+				%{share...
+		</answer>
+	</item>
+	<item>
+		<question>I'm using SuSE and cannot locate libz.so.</question>
+		<answer>
+			zlib is called libgz.so on SuSE systems prior to 6.2. 
+			To fix, try this as root:
+
+			ln -s /usr/lib/libgz.so /usr/lib/libz.so
+			ldconfig
+
+			It creates a symlink and updates the library cache.
+		</answer>
+	</item>
+	<item>
+		<question>My compiler dies with a 'MAP_FAILED undeclared' message.</question>
+		<answer>
+			We've had reports from people using the Slackware Linux distribution that
+			the compile fails because MAP_FAILED is undefined. This is supposed to be
+			in sys/mman.h as a return value of mmap(), but apparently isn't on some
+			systems. We don't know if this is a Slackware problem or a libc5/kernel
+			issue, but feel free to enlighten us.
+
+			Until then, we recommend pasting the following code into your
+			/usr/include/sys/mman.h, or in some other headerfile if you prefer not to
+			muck with your system header files (or don't have permissions?)
+			<detail>
+				#ifndef MAP_FAILED
+				#define MAP_FAILED ((__ptr_t) -1)
+				#endif
+			</detail>
+		</answer>
+	</item>
+	<item>
+		<question>I use Slack 7 and getting errors about cannot specify -o with -c or -S...
+			<detail>
+			      Sources/Core/Display/Generic/cliprect.cpp g++: cannot specify -o with -c
+			      or -S and multiple compilations
+			      make: *** [Libs/Intermediate/cliprect.o]
+			      Error 1
+			</detail>
+		</question>
+		<answer>
+			The problem is that configure fails at detecting where X11 is installed.
+			This means that Makefile.conf gets a faulty "-I -I" and an empty "-L". If
+			you remove those in Makefile.conf, then your compile should preceed without
+			problems. (Or better, modify configure to correctly locate X11, and send us
+			a patch).
+		</answer>
+	</item>
+</section>
+
+<section title="Installing under Linux">
+	<item>
+		<question>When trying to install the ClanLib rpms I get failed dependencies...
+			<detail>
+				failed dependencies:
+				libstdc++-libc6.1-1.so.2 is needed by ClanLib-...
+				libm.so.6(GLIBC_2.1) is needed by ClanLib-...
+				libc.so.6(GLIBC_2.0) is needed by ClanLib-...
+			</detail>
+		</question>
+		<answer>
+			You don't have a new enough version of glibc. This usually happens when
+			using the RPM's on a RedHat 5.x system, while the rpms were compiled on RH 6.0.
+
+			You need to install these (or newer) RPM's: (get them from RedHat's site)
+
+			<detail>
+				rpm -i glib-1.2.1-2.i386.rpm
+				rpm -i glibc-2.1.1-6.i386.rpm --upgrade
+				rpm -i libstdc++-2.9.0-12.i386.rpm
+			</detail>
+
+			This will enable you to use most RedHat 6.0 RPMs on the net, not just ClanLib's.
+		</answer>
+	</item>
+</section>
+
+<section title="Running under Linux">
+	<item>
+		<question>What is required to run ClanLib games under Linux ?</question>
+		<answer>
+			ClanLib, Hermes and zlib is required to run games under Linux, unless they are statically linked
+			to your game.
+		</answer>
+	</item>
+
+	<item>
+		<question>
+			I've installed Hermes, but when I try and run any ClanLib appliction, I
+			get errors about cannot open shared object file libHermes...
+			<detail>
+				error in loading shared libraries: libHermes.so.1: cannot open shared
+				object file: No such file or directory
+			</detail>
+		</question>
+		<answer>
+			Upgrade to latest Hermes (as FAQ was written this was version 1.3.x).
+		</answer>
+	</item>
+
+	<item>
+		<question>How can I use fullscreen with ClanLib under Linux using GGI target?</question>
+		<answer>
+			Set the following environment variable before you start the game:
+			<detail>
+				$ export GGI_DISPLAY=dga
+			</detail>
+			Note that you will have to run the game as root or setuid root for this to work.
+		</answer>
+	</item>
+</section>
+
+<section title="Compiling under Windows">
+	<item>
+		<question>
+			I try to compile an app using ClanLib under Visual C++ and it gets
+			unresolved external symbol _main...
+			<detail>
+				Linking...
+				LIBCD.lib(crt0.obj) : error LNK2001: unresolved external symbol _main
+			</detail>
+		</question>
+		<answer>
+			You have to create a Win32 Application project and not a Win32 Console
+			Application. Otherwise, add the linker option "/entry:WinMainCRTStartup"
+			to your project options.
+		</answer>
+	</item>
+	<item>
+		<question>
+			I try to compile an app using ClanLib under Visual C++ and it gets
+			unresolved external symbol _WinMain...
+			<detail>
+				Linking...
+				LIBCD.lib(crt0.obj) : error LNK2001: unresolved external symbol
+				_WinMain@16
+			</detail>
+		</question>
+		<answer>TODO: Link to installation guide</answer>
+	</item>
+	<item>
+		<question>When I compile ClanLib, I get messages about "Directory already exists"</question>
+		<question>When I compile ClanLib, I get warnings about __NULL_IMPORT_DESCRIPTOR...
+			<detail>
+				ddraw.lib(DDRAW.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in winmm.lib(WINMM.dll); second definition ignored
+				dsound.lib(DSOUND.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in winmm.lib(WINMM.dll); second definition ignored
+				dinput.lib(DINPUT.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in winmm.lib(WINMM.dll); second definition ignored
+				wsock32.lib(WSOCK32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in winmm.lib(WINMM.dll); second definition ignored
+			</detail>
+		</question>
+		<answer>Ignore these warnings, they are non-fatal.</answer>
+	</item>
+	<item>
+		<question>I get errors about conflicts with the library "LIBCMT"
+			<detail>
+				LINK : warning LNK4098: defaultlib "LIBCMT" conflicts with use of other libs; use /NODEFAULTLIB:library
+			</detail>
+		</question>
+		<answer>
+			Enter the project settings, in the Link section, select the Input category, and
+			write "libcmt" to the Ignore Libraries section.
+		</answer>
+	</item>
+
+	<item>
+		<question>How can I compile ClanLib under Win32 using an other compiler than Visual C++?</question>
+		<question>Can I use the windows binaries with another compiler than Visual C++?</question>
+
+		<answer>
+			ClanLib does not currently officially support anything but Microsoft Visual C++
+			under Windows. But it should be possible to use ClanLib with other
+			compilers. Recently support for Borland C was added, but in an experimental state.
+			
+			If people want to use another compiler together with ClanLib, notice
+			that there are some things you need to be aware of:
+
+			1. You probably cannot use the win32 binaries. Because there is no standard on
+			the symbol names used, it will be only Visual C++ 6.0 that those are
+			guaranteed to work with.
+
+			2. You will have to make your own makefiles or projectfiles.
+		</answer>
+	</item>
+	<item>
+		<question>What is the configure app ?</question>
+		<answer>
+			In the source package, there is a workspace called Configure.dsw. It
+			produces the real ClanLib workspace and project files based on some questions
+			asked in a MFC Wizard. This configure app should always be run after a ClanLib
+			update, and of course when compiling ClanLib for the first time.
+		</answer>
+	</item>
+</section>
+
+<section title="Running under Windows">
+	<item>
+		<question>What is required to run ClanLib games under Windows?</question>
+		<answer>
+			Nothing except your game, as all libraries will be statically linked into your game.
+		</answer>
+	</item>
+	<item>
+		<question>How do I get a console window under Windows to print debug information ?</question>
+		<answer>
+			You can add this code to your app:
+			<detail>
+				// Create a console window for text-output if not available
+				CL_ConsoleWindow console("Console");
+				console.redirect_stdio();
+
+				.... rest of app ....
+
+				// Display console close message and wait for a key
+				console.display_close_message();
+			</detail>
+			Otherwise, you can specify the following linker options for a standard Win32
+			Application project:
+			<detail>
+				/entry:"WinMainCRTStartup" /subsystem:console
+			</detail>
+		</answer>
+	</item>
+</section>
+
+<section title="Installing under BeOS">
+	<item>
+		<question>
+			I'm using BeOS, where do I have to put the ClanLib libraries in order to 
+		     	compile anything using them - configure won't recognize their existence?
+		</question>
+		<answer>
+		      Put them into /boot/beos/system/lib - It is not a good place for user 
+      		installed libs but they are recognized there.
+		</answer>
+	</item>
+	<item>
+		<question>I can't get the BeOS port to work!</question>
+		<answer>
+			The BeOS port is currently work-in-progress, and its not expected to work yet.
+		</answer>
+	</item>
+</section>
+
+<section title="Programming issues">
+	<item>
+		<question>
+			I want to create a font using resource, but I get a problem when the font
+		      contains the letters ,;#{}()="
+		</question>
+		<answer>
+			Enclose the letters in ", and use "" to specify ".
+			Example: ... (type=font, ..., letters="abcdef0123456,;""#{}()=");
+		</answer>
+	</item>
+
+	<item>
+		<question>How do I get access to the frame buffer?</question>
+		<answer>
+			Most likely you only want access to surface data and this can be
+			accomplished by using surface->get_provider()->get_data() after locking
+			the provider. Don't forget to surface->reload() if you changed the data.
+		</answer>
+	</item>
+
+	<item>
+		<question>Are there plans to add support for Alpha blending?</question>
+		<answer>
+			We do support alpha blending. Just load an image with alpha values, and
+			it will alpha blend when put_screen'ed.
+		</answer>
+	</item>
+
+	<item>
+		<question>What happened to the Datafilecompiler since 0.3.0 ?</question>
+		<answer>
+			The datafile compiler is now part of your executable. So if your app
+			executable is called FooBar, your produce it like this:
+			<detail>
+				./FooBar -datafile FooBar.scr FooBar.dat
+			</detail>
+			and with Windows:
+			<detail>
+				FooBar.exe -datafile FooBar.scr FooBar.dat
+			</detail>
+			If you want the makefile to build it, do something like this:
+			<detail>
+				FooBar.dat: FooBar FooBar.scr
+				./FooBar -datafile FooBar.scr FooBar.dat
+
+				FooBar: $(OBJF)
+				g++ -o FooBar $(OBJF) -lclanCore
+
+				all: FooBar FooBar.dat
+			</detail>
+
+			If you're using Windows, you enter the project settings menu, and add a
+			custom build to FooBar (top tree node), and write the following:
+			<detail>
+				$(INPUTPATH) -datafile FooBar.scr FooBar.dat
+			</detail>
+		</answer>
+	</item>
+	<item>
+		<question>What happened to the internal datafilecompiler since 0.5.0 ?</question>
+		<question>How do I compile the datafiles ?</question>
+		<answer>
+			Please read the file README.upgrade on how to upgrade your app from earlier versions.
+		</answer>
+	</item>
+	<item>
+		<question>
+			When I try to run my ClanLib program, it tells me there is no global
+			CL_ClanApplication instance...
+			<detail>
+				ClanLib: No global CL_ClanApplication instance!!!
+			</detail>
+		</question>
+		<answer>
+			The CL_ClanApplication class must be inherited by all ClanLib
+			applications. In your application you must create a class inheriting
+			CL_ClanApplication, make a global instance of it, and fill in the main() and
+			get_title() functions. 
+		</answer>
+	</item>
+	<item>
+		<question>I don't think the datafile compiler should be in our app!</question>
+		<answer>
+			There is a technical reason that the compiler was made a part of the app:
+			custom resources. It is possible for apps to create their own types of
+			resources, and therefore its neccessary that the datafilecompiler is in the
+			app.
+		</answer>
+	</item>
+	<item>
+		<question>Why is alpha blending really really slow on windows?</question>
+		<answer>
+			The windows version of ClanLib uses DirectDraw for 2d graphics. ClanLib 
+			instructs DirectDraw per default to create the backbuffer (the screen) in
+			video memory. Reading from video memory (which obviously is required when
+			alpha blending) is really really slow on most graphics cards. One possible
+			solution if you have to use a lot of alpha blending, you can try to call
+			CL_Display::set_videomode() with the 'video_memory' flag set to false.
+			This will create the backbuffer in system memory, which might increase 
+			performance.
+		</answer>
+	</item>
+	<item>
+		<question>
+			I'm getting an error while using the resources.
+			It says: Unknown type 'surface' declared for resource 'Graphics/maptiles'
+		</question>
+		<answer>
+			unknown type 'surface' means that you didn't initialise clanDisplay.
+			The different resource types must be registered before trying to access
+			the resource file, and this is done in eg. CL_SetupDisplay::init().
+		</answer>
+	</item>
+</section>
+
+<section title="CVS">
+	<item>
+		<question>I run WinCVS, and it exits with code 0...
+			<detail>
+				*****CVS exited normally with code 0******
+
+				What do I do wrong ?
+			</detail>
+		</question>
+		<answer>Nothing, this simply means everything went OK.</answer>
+	</item>
+</section>
+
+<section title="Misc">
+	<item>
+		<question>Where ClanLib name came from? What's the clan for?</question>
+		<answer>
+			The Clan prefix originates from the term "The Norddahl Clan". On the old
+			fido net, we were called this because we always shared the same opinions.
+		</answer>
+	</item>
+	<item>
+		<question>Is there a searchable archive for ClanLib mailing lists ?</question>
+		<answer>No.</answer>
+	</item>
+</section>
+
+</faq>

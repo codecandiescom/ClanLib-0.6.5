@@ -1,0 +1,30 @@
+Due to the modest volume of patches we get on the mailing list and
+because all recent patches that have come in are rather hairy, I am
+writing up a summary of how to create patches for the mailing list.
+
+Diffing
+===================================
+Use 'diff -u' or 'cvs diff -u' from within the Libs/ClanLib-0.6 directory. 
+This is contextual diff, it provides more information so it easier to
+examine the changes before applying.
+
+If you're using Windows, you might want to download the small utility
+at http://clanlib.org/development/winpatch.html.
+Do your changes in a copy of the ClanLib directory (so you have one
+copy with the original sourcefiles, and one with your changes).
+Run the winpatch utility, fill in the paths to the two directories,
+and it generates a patch (list of changes you did to files).
+
+Submitting
+===================================
+Patches should be compressed (not everybody in on cable or DSL)
+Prefered formats are: Gzip, Zip.
+
+Please submit patches to our mailing-list (either devel or user).
+clanlib-devel@dark.x.dtu.dk, or clanlib-user@dark.x.dtu.dk.
+
+Describing
+===================================
+You should describe what your patch does.  Please no 'This fixes a bug'.
+Tell us which bug, in what component. Generally, be descriptive without
+being needless verbose.

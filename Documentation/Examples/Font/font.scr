@@ -1,0 +1,19 @@
+section Fonts
+{
+	fnt_clansoft = clanfont.pcx (
+		type=font,
+		x=129,
+		y=209,
+		tcol=0,
+		spacelen=6,
+		letters=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+	);
+
+	fnt_avantgarde = avantgarde-white-bold-18.tga (
+		type=font,
+		trans_limit=0.05,
+		subtract_width=0,
+		spacelen=8,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZÊ∆¯ÿÂ≈0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+}

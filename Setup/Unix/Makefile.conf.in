@@ -1,0 +1,54 @@
+# $Id: Makefile.conf.in,v 1.10 2002/04/06 12:54:58 japj Exp $
+#
+# This file contains all compiler options used to build ClanLib.
+#
+
+D_VERSION_MAJOR=@version_major@
+D_VERSION_MINOR=@version_minor@
+
+prefix        = @prefix@
+exec_prefix   = @exec_prefix@
+LIB_PREFIX    = @libdir@
+INC_PREFIX    = @includedir@
+BIN_PREFIX    = @bindir@
+TARGET_PREFIX = @libdir@/ClanLib
+
+INCLUDE_DIRS  = -I Sources @x_includes@ @extra_includes@
+
+COMP_OPTIONS  = -Wall $(INCLUDE_DIRS) -fPIC -DNOCONTROLS -D__int64=int64_t @DEFS@ @comp_mode@ @directfb_cflags@
+
+LINK_CORE     = @libs@
+
+OBJF_NONDYN   = @objf_nondyn@
+
+LINK_COMMAND  = @link_command@ @extra_libraries@
+
+CXX_COMMAND = @CXX@ @CXXFLAGS@ $(COMP_OPTIONS) -c 
+
+CC_COMMAND = @CC@ @CFLAGS@ $(COMP_OPTIONS) 
+
+AS_COMMAND = $(AS) 
+
+Libs/Intermediate/%.o : %.cpp
+	@echo "Compiling $<"
+	-@if [ ! -d Libs ]; then mkdir Libs; fi
+	-@if [ ! -d Libs/Intermediate ]; then mkdir Libs/Intermediate; fi
+	@$(CXX_COMMAND) $< -o $@
+
+Libs/Intermediate/%.o : %.c
+	@echo "Compiling $<"
+	-@if [ ! -d Libs ]; then mkdir Libs; fi
+	-@if [ ! -d Libs/Intermediate ]; then mkdir Libs/Intermediate; fi
+	@$(CC_COMMAND) -c $< -o $@
+
+Libs/Intermediate/%.o : %.s
+	@echo "Assembling $<"
+	-@if [ ! -d Libs ]; then mkdir Libs; fi
+	-@if [ ! -d Libs/Intermediate ]; then mkdir Libs/Intermediate; fi
+	@$(AS_COMMAND) $< -o $@
+
+build_info:
+	@echo Compile command .cpp = $(CXX_COMMAND)
+	@echo Compile command .c   = $(CC_COMMAND)
+	@echo Compile command .s   = $(AS_COMMAND)
+

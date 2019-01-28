@@ -1,0 +1,36 @@
+frame my_frame
+{
+	x = 0;
+	y = 0;
+	width = 320;
+	height = 200;
+	
+	button my_button1
+	{
+		text = "Button1";
+		x = 50;
+		y = 10;
+		width = 64;
+		height = 20;
+	}
+
+	button my_button2
+	{
+		text = "Button2";
+		x = 10;
+		y = 60;
+		width = 64;
+		height = 20;
+		enabled = false;
+	}
+
+	button my_button3
+	{
+		text = "Button3";
+		x = 100;
+		y = 60;
+		width = 64;
+		height = 20;
+		visible = false;
+	}
+}

@@ -1,0 +1,8 @@
+label my_label
+{
+	text = hello;
+	x = 15;
+	y = 15;
+	width = 100;
+	height = 30;
+}

@@ -1,0 +1,67 @@
+How to port ClanLib
+=========================================
+
+The purpose of this document is to describe how to port/extend ClanLib.
+
+1. Architecture
+  
+If your porting to architecture different from the i386 then you might have to set some defines.
+ 
+  -If your CPU is big endian then you must define USE_BIG_ENDIAN
+  -If your CPU is 64bit then you must define USE_64BIT
+
+Note: At this time ClanLib is neither 64bit nor endian clean.  No comprehensive testing has been done on non-i386 architectures.
+
+
+2. Operating System
+
+If you do not have your platform's SDK then you should acquire it and become familiar with it before continuing. 
+
+Note: From this point forward I will refer to the ClanLib directory as the root directory from this point on.
+
+In Sources/Core/System is the system specific data areas. 
+	- Be for BeOS
+	- Unix for Unix
+	- Win32 for Windows 95/98/ME/NT/2K
+	- Generic code is good everywhere
+		- There maybe portability issues here
+
+If your OS isn't listed above you should create a specific directory for it.  
+
+In other directories you will find a similar setup. Typically these directories contain Input/Output routines.
+
+On your porting efforts I suggest you begin with the Sources/Core/System directory then move the Display.
+
+
+3. Compiler
+
+Porting from one compiler to another can be a hairy experience.  Setting up the environment itself can be painful.  
+Any compiler specific functions should isolated with compiler specific defines not OS defines.
+
+An example if you're using GCC:
+
+#ifdef __GNUC__
+	//whatever for GCC
+#else
+	//Something Generic for all compilers
+#endif
+
+Here is a short list for a quick reference
+
+	- i386 assembler 	USE_I386_ASSEMBLER
+	- Borland C++	__BORLANDC__
+	- Windows		WIN32 or _WINDOWS
+		* This should not be construed as meaning MSVC++
+	- GCC			__GNUC__
+	- MSVC++		_MSC_VER
+	- Linux		linux
+	- FreeBSD __FreeBSD__
+
+In general you shouldn't have to define anything.  
+
+4. Standard Libraries/Compilers
+
+A major obstacle that people have encountered when porting is function names. 
+For instance, some libraries have acos while other have acosf. Which do we use?
+Well, in some places it should be setup so you don't have to care what is used.
+

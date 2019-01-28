@@ -1,0 +1,30 @@
+#
+# Makefile data for clanLua library
+#
+
+clanLua: Libs/libclanLua.so Libs/libclanLua.a
+
+installLua: clanLua
+	@for i in `find Sources/API/Lua -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Lua -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/lua.h $(INC_PREFIX)/ClanLib/lua.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanLua.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanLua.a $(LIB_PREFIX)
+	@ln -s -f libclanLua.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanLua.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanLua.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanLua.so
+
+OBJF_LIB_LUA = \
+	Libs/Intermediate/clanbindings.o 
+
+Libs/libclanLua.so: Libs/libclanCore.so $(OBJF_LIB_LUA)
+	@echo "Building Libs/libclanLua.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanLua.so.$(D_VERSION_MAJOR) -o Libs/libclanLua.so.$(D_VERSION_MINOR) $(OBJF_LIB_LUA) -L Libs -lclanCore -llua -llualib -ltolua
+	@ln -s -f libclanLua.so.$(D_VERSION_MINOR) Libs/libclanLua.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanLua.so.$(D_VERSION_MAJOR) Libs/libclanLua.so
+
+Libs/libclanLua.a: $(OBJF_LIB_LUA)
+	@echo "Building Libs/libclanLua.a"
+	-@if [ -e Libs/libclanLua.a ]; then rm -f Libs/libclanLua.a; fi
+	@ar qc Libs/libclanLua.a $(OBJF_LIB_LUA)
+

@@ -1,0 +1,148 @@
+$Id: CODING_STYLE,v 1.5 2001/09/22 15:52:09 plasmoid Exp $
+
+ClanLib coding style and conventions:
+--------------------------------------
+
+1. All classes have a "CL_" prefix. Eg. CL_Display, CL_SoundBuffer...
+2. All macros have a "cl_" prefix. Eg. cl_assert, cl_info...
+
+3. We do NOT use K&R style C style. We use the special ClanSoft variant of
+the Microsoft style!! Please do NOT use K&R style and not GNU style either.
+Braces should look like this:
+
+int CL_MyClass::my_func(int arg1, int arg2)
+{
+	if (...)
+	{
+		switch (whatever)
+		{
+		case 1:
+			break;
+		
+		case 2:
+			{
+				int i = 5;
+				...
+			}
+			break;
+		}
+	}
+	else
+	{
+	}
+}
+
+Please try to follow this indenting style as closely as you can. If
+you are using Emacs you can set the coding style with:
+
+(c-set-style "linux") or C-c . linux
+
+4. We always use TABS, and NEVER SPACES to do indenting. This is because we
+want people to be able to pick their own tab size. I run with 4, but others
+like 8 and some like 2.
+
+So please don't use spaces. It will have a very bad effect when someone else
+uses another tab size than you. For instance, imagine the following was
+written by someone using tabs, and then you add a section with spaces:
+(all is written here with spaces so people will notice the difference seen
+with other tab sizes than their own)
+
+	void my_func()
+	{
+	    int a,b,c,d;
+	    a = b + c/d;
+	    
+	    // added section with spaces:
+	    d = a;
+	    c = b/d;
+	    // end of space section
+	    
+	    do_something(a,b,c,d);
+	}
+
+So it looks nice to you - but then we watch it with someone that has tab
+size 8:
+
+	void my_func();
+	{
+	        int a,b,c,d;
+	        a = b + c/d;
+	    
+	    // added section with spaces:
+	    d = a;
+	    c = b/d;
+	    // end of space section
+	
+	        do_something(a,b,c,d);
+	}
+
+Not very nice, is it?
+
+Many unix editors use a "smart" indenting algorithm which will fuck things
+even more up. They exchange spaces with tabs when reaching a given size
+(normally 8 or 4), but that just isn't very smart. The result is that some
+sections are spaces, and others are tabbed - all messed into one pile of
+junk.
+
+So please verify that your editor does indenting correct. This is
+important.
+
+5. Function names and variables are always in small, and underscore is used
+where other people often use a captial letter.
+Eg. MyVariable -> my_variable.
+
+6. Variable access functions have a set/get prefix.
+Eg. int size()         -> int get_size()
+    void size(int s)   -> void set_size(int s)
+
+7. The API documentation
+API header files (In Sources/API) should be commented at follows:
+
+(Note where the "//:" and "//-" are used)
+
+For classes: (Applicable for public members only)
+	//: A short snappy description
+	//- A long description.
+	//- This can be on multiple lines
+	//- <p>Or on a single
+	//- line like this</p>
+	class CL_Runnable
+	{
+		//: This is the function description
+		//: This can be on multiple lines
+		//: <p>Or on a single
+		//: line like this</p>
+		//- my_variable - This variable does this
+		//- Returns - This function returns this
+		int my_funtion(int my_variable);
+	}
+
+The description can contain: (may be on multiple lines)
+"This {\i function does this} well" for italics
+"This {\b function does that} well" for bold
+"This {\example function does nothing} well" for an example (different font)
+"This {\link function CL_function.html} is great" for a html link
+
+If the description contains Class names - a link will automatically be added.
+
+Each header file should contain below the GPL notice:
+//! clan{group}="{section}"
+{group} denotes the ClanLib group (eg Core, Display, GUI)
+{section} denotes the group section (eg "Controls" for GUI)
+
+To denote which base header file a class belongs to:
+//! header={fname}.h
+{fname} denotes the base header file name eg "display"
+
+To denote sections within a class use:
+//! {name}
+{name} denotes the section name (eg Construction:)
+
+
+There is more things than there - but I think this summarizes the most
+important issues. In general, just do like the other source files do.
+
+
+TODO: Add API header file rules.
+TODO: Add source tree explaination.
+

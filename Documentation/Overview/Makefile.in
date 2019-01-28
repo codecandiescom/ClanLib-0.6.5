@@ -1,0 +1,31 @@
+prefix=@prefix@/share
+
+HTML_PREFIX = $(prefix)/doc/ClanLib-docs-@version_minor@/Documentation
+
+all:	index.html
+
+index.html:
+	../Utilities/webbuilder.pl ../documentation.theme 2dapi.xml
+	../Utilities/webbuilder.pl ../documentation.theme engine_design.xml
+	../Utilities/webbuilder.pl ../documentation.theme font_creation_new.xml
+	../Utilities/webbuilder.pl ../documentation.theme font_creation_old.xml
+	../Utilities/webbuilder.pl ../documentation.theme font_overview.xml
+	../Utilities/webbuilder.pl ../documentation.theme getting_started.xml
+	../Utilities/webbuilder.pl ../documentation.theme gui_overview.xml
+	../Utilities/webbuilder.pl ../documentation.theme loading_graphics.xml
+	../Utilities/webbuilder.pl ../documentation.theme network_overview.xml
+	../Utilities/webbuilder.pl ../documentation.theme opengl_overview.xml
+	../Utilities/webbuilder.pl ../documentation.theme resource_overview.xml
+	../Utilities/webbuilder.pl ../documentation.theme signals.xml
+	../Utilities/webbuilder.pl ../documentation.theme index.xml
+
+install:
+	@install -d $(HTML_PREFIX)/Overview/Images
+	@install -m 0644 *.html $(HTML_PREFIX)/Overview
+	@install -m 0644 Images/*.gif $(HTML_PREFIX)/Overview/Images
+	@install -m 0644 Images/*.png $(HTML_PREFIX)/Overview/Images
+distclean: clean
+	rm Makefile
+	
+clean:
+	rm -f *.html

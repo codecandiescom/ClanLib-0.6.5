@@ -1,0 +1,32 @@
+#
+# Makefile data for clanMikMod library.
+#
+
+clanMikMod: Libs/libclanMikMod.so Libs/libclanMikMod.a
+
+installMikMod: clanMikMod
+	@for i in `find Sources/API/MikMod -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/MikMod -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/mikmod.h $(INC_PREFIX)/ClanLib/mikmod.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanMikMod.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanMikMod.a $(LIB_PREFIX)
+	@ln -s -f libclanMikMod.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanMikMod.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanMikMod.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanMikMod.so
+
+OBJF_LIB_MIKMOD = \
+	Libs/Intermediate/resourcetype_module.o \
+	Libs/Intermediate/setupmikmod.o \
+	Libs/Intermediate/module_reader.o \
+	Libs/Intermediate/streamed_mikmod_sample.o
+
+Libs/libclanMikMod.so: Libs/libclanCore.so $(OBJF_LIB_MIKMOD)
+	@echo "Building Libs/libclanMikMod.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanMikMod.so.$(D_VERSION_MAJOR) -o Libs/libclanMikMod.so.$(D_VERSION_MINOR) $(OBJF_LIB_MIKMOD) -L Libs -lclanCore -lmikmod
+	@ln -s -f libclanMikMod.so.$(D_VERSION_MINOR) Libs/libclanMikMod.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanMikMod.so.$(D_VERSION_MAJOR) Libs/libclanMikMod.so
+
+Libs/libclanMikMod.a: $(OBJF_LIB_MIKMOD)
+	@echo "Building Libs/libclanMikMod.a"
+	-@if [ -e Libs/libclanMikMod.a ]; then rm -f Libs/libclanMikMod.a; fi
+	@ar qc Libs/libclanMikMod.a $(OBJF_LIB_MIKMOD)

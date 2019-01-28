@@ -1,0 +1,33 @@
+#
+# ClanSoft Documentation: FAQ theme,
+# Copyright (c) 1999 by Magnus Norddahl / ClanSoft & Kenneth Gangstoe.
+#
+
+use English;
+
+open(xml_file, "FAQ.xml") or die;
+@lines = <xml_file>;
+close(xml_file);
+
+$lines = join("", @lines);
+
+$lines =~ s/^\t*//gm;
+
+$lines =~ s/<xml>/<html>/gs;
+$lines =~ s/<\/xml>/<\/html>/gs;
+
+$lines =~ s/<version>(.*?)<\/version>/<pre>$1<\/pre>/gs;
+
+$lines =~ s/<detail>(.*?)<\/detail>/<pre>$1<\/pre>/gs;
+
+$lines =~ s/<question>(.*?)<\/question>/<tr><td valign=top>Question:<\/td><td><i>$1<\/i><\/td><\/tr>/gs;
+
+$lines =~ s/<answer>(.*?)<\/answer>/<tr><td valign=top>Answer:<\/td><td>$1<\/td><\/tr>/gs;
+
+$lines =~ s/<item>(.*?)<\/item>/<table>$1<\/table><br><br>/gs;
+
+$lines =~ s/<section title=\"(.*?)\">(.*?)<\/section>/<h2>$1<\/h2>$2/gs;
+
+open(html_file, ">FAQ.html") or die;
+print html_file $lines;
+close(html_file);

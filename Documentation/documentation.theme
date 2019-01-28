@@ -1,0 +1,134 @@
+#
+# ClanSoft Documentation: Overview theme,
+# Copyright (c) 1999 by Magnus Norddahl / ClanSoft & Kenneth Gangstoe.
+#
+
+use English;
+
+sub theme_header
+{
+	my ($xml_head) = @ARG;
+	my $html;
+
+	my $image_path = "Images";
+
+	my $title = "";
+	$title = $1 if ($xml_head =~ /<title>(.*?)<\/title>/si);
+
+	$html .= <<END;
+
+<HTML>
+<HEAD>
+<TITLE>ClanLib Game SDK: $title</TITLE>
+<STYLE TYPE="text/css"><!--
+HTML BODY
+{
+	font-family: verdana, helvetica, sans-serif;
+	font-size: 14px;
+	border-style: solid;
+}
+H1 { font-size: 22px; }
+H2 { font-size: 18px; }
+H3 { font-size: 16px; }
+H4 { font-size: 14px; }
+P { font-size: 14px; }
+LI { font-size: 14px; }
+--></STYLE>
+</HEAD>
+
+<body bgcolor=white text=black>
+<center>
+<table width=70%>
+<tr>
+<td>
+
+<center><table><tr><td>
+<img
+END
+	$html .= "	SRC=\"$image_path/clanlib_logo_small.gif\"\n";
+	$html .= <<END3;
+ alt="ClanLib logo"><br>
+</td></tr></table></center>
+END3
+
+	$html .= "<h1>$title</h1>\n\n" if ($title ne "");
+
+	return $html;
+}
+
+sub theme_body_filters
+{
+	my @filters;
+
+	push(@filters, \&filt_code);
+	push(@filters, \&filt_codelink);
+	push(@filters, \&filt_std);
+
+	return @filters;
+}
+
+sub theme_body_end
+{
+	my $str = <<END2;
+</TD>
+</TR>
+</TABLE>
+<BR>
+<BR>
+<FONT COLOR="#a0a0a0">Questions or comments, write to the <a href="mailto:clanlib-user@dark.x.dtu.dk">ClanLib mailing list</a>.</FONT>
+</CENTER>
+</BODY>
+</HTML>
+END2
+
+	return $str;
+}
+
+sub filt_code
+{
+	my ($xml_body) = @ARG;
+	
+	while ($xml_body =~ /<code>(.*?)<\/code>/si)
+	{
+		my $code = $1;
+		$code =~ s/</&lt;/g;
+		$code =~ s/>/&gt;/g;
+		$code =~ s/^\n//;
+
+		$xml_body =~ s/<code>.*?<\/code>/<ul><pre><font face=\"Arial,Courier New,Courier\">$code<\/font><\/pre><\/ul>/si;
+	}
+
+	return $xml_body;
+}
+
+sub filt_codelink
+{
+	my ($xml_body) = @ARG;
+	
+	while ($xml_body =~ /<codelink>(.*?)<\/codelink>/si)
+	{
+		my $code = $1;
+		$code =~ s/</&lt;/g;
+		$code =~ s/>/&gt;/g;
+		$code =~ s/(CL_\w+)/<a href=\"..\/Reference\/html\/$1.html\">$1<\/a>/g;
+		
+		$xml_body =~ s/<codelink>.*?<\/codelink>/$code/si;
+	}
+
+	return $xml_body;
+}
+
+sub filt_std
+{
+	my ($xml_body) = @ARG;
+
+	$xml_body =~ s/<h>/<h2>/ig;
+	$xml_body =~ s/<\/h>/<\/h2>/ig;
+	$xml_body =~ s/<menu>/<ul>/ig;
+	$xml_body =~ s/<\/menu>/<\/ul>/ig;
+	$xml_body =~ s/<menuitem \"(.*?)\" \"(.*?)\" \"(.*?)\">/<li><a href=\"$1\">$2<\/a><br>\n<ul>$3<\/ul><br>/ig;
+	$xml_body =~ s/<image \"(.*?)\" \"(.*?)\">/<img src=\"$image_path\/$1\" alt=\"$2\">/ig;
+	$xml_body =~ s/<a download=\"/<a href=\"http:\/\/dark.x.dtu.dk\/~mbn\/clanlib\/download\//ig;
+
+	return $xml_body;
+}

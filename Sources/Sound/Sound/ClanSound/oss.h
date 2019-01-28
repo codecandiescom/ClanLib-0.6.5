@@ -1,0 +1,40 @@
+/*
+	$Id: oss.h,v 1.2 2001/09/08 19:24:21 japj Exp $
+	
+	ClanSound, sound mixing library written for ClanLib.
+	Copyright (c)1998 Magnus Norddahl / ClanSoft.
+
+	OSS Documentation can be found at http://www.opensound.com
+*/
+
+#ifndef header_oss
+#define header_oss
+
+class CL_CSOutput
+{
+public:
+	CL_CSOutput();
+	~CL_CSOutput();
+
+	void silence();
+	// Called when we have no samples to play - and wants to tell the soundcard
+	// about this possible event.
+
+	bool is_full();
+	// Returns true if all fragments are filled with data.
+
+	int get_frag_size();
+	// Returns the buffer size used by device (returned as num [stereo] samples).
+
+	void write_fragment(short *data);
+	// Writes a fragment to the soundcard.
+
+	void wait();
+	// Waits until output source isn't full anymore.
+
+private:
+	int dev_dsp_fd;
+	int frag_size;
+};
+
+#endif

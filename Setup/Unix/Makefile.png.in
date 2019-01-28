@@ -1,0 +1,30 @@
+#
+# Makefile data for clanPNG library.
+#
+
+clanPNG: Libs/libclanPNG.so Libs/libclanPNG.a
+
+installPNG: clanPNG
+	@for i in `find Sources/API/PNG -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/PNG -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/png.h $(INC_PREFIX)/ClanLib/png.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanPNG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanPNG.a $(LIB_PREFIX)
+	@ln -s -f libclanPNG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanPNG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanPNG.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanPNG.so
+
+
+OBJF_LIB_PNG = \
+	Libs/Intermediate/provider_png.o
+
+Libs/libclanPNG.so: Libs/libclanCore.so $(OBJF_LIB_PNG)
+	@echo "Building Libs/libclanPNG.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanPNG.so.$(D_VERSION_MAJOR) -o Libs/libclanPNG.so.$(D_VERSION_MINOR) $(OBJF_LIB_PNG) -L Libs -lclanCore -lpng
+	@ln -s -f libclanPNG.so.$(D_VERSION_MINOR) Libs/libclanPNG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanPNG.so.$(D_VERSION_MAJOR) Libs/libclanPNG.so
+
+Libs/libclanPNG.a: $(OBJF_LIB_PNG)
+	@echo "Building Libs/libclanPNG.a"
+	-@if [ -e Libs/libclanPNG.a ]; then rm -f Libs/libclanPNG.a; fi
+	@ar qc Libs/libclanPNG.a $(OBJF_LIB_PNG)

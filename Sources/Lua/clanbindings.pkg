@@ -1,0 +1,408 @@
+/*  libclanLua package file
+	
+	------------------------------------------------------------------------
+	ClanLib, the platform independent game SDK.
+
+	This library is distributed under the GNU LIBRARY GENERAL PUBLIC LICENSE
+	version 2. See COPYING for details.
+
+	For a total list of contributers see CREDITS.
+
+	------------------------------------------------------------------------
+
+Lenny Palozzi
+domain@ica.net
+
+Notes
+-----
+* All ClanLib bools have been replaced with ints.
+	- doh! Lua supports typedefs
+* Inline code has been removed
+*
+
+Problems
+--------
+* Can't get tolua to accept overloaded operator ==. Those methods have been commented out.
+	- tolua does not support the overloading of the == operator.
+	
+Bound Classes
+-------------
+CL_Display
+CL_System
+CL_ClipRect
+CL_Surface
+CL_Target
+CL_SurfaceProvider
+CL_Canvas
+CL_Mouse
+
+
+build with:
+	
+	tolua -o clanbindings.cpp -n clanbindings clanbindings.pkg
+
+usage: tolua [options] input_file
+
+Command line options are:
+  -v       : print version information.
+  -o  file : set output file; default is stdout.
+  -H  file : create include file.
+  -n  name : set package name; default is input file root name.
+  -p       : parse only.
+  -P       : parse and print structure information (for debug).
+  -h       : print this message.
+Should the input file be omitted, stdin is assumed;
+in that case, the package name must be explicitly set.
+
+*/
+/*
+changes made by Juan Pablo Sousa gotem@users.sourceforge.net
+to change it to lua 4.0 and latest clanlib 0.5.0
+*/
+
+$#include <API/core.h>
+$#include <API/display.h>
+$#include <API/application.h>
+$#include <API/lua.h>
+$#define TRUE	1
+$#define FALSE	0
+
+#define TRUE	1
+#define FALSE	0
+typedef unsigned int	bool;
+
+class CL_Display
+{
+public:
+	virtual ~CL_Display() { ; }
+
+	static void flip_display(int sync=0);
+	static void put_display(const CL_Rect &rect);
+	static void sync_buffers();
+	static void clear_display(float red=0, float green=0, float blue=0, float alpha=1);
+	static void set_palette(CL_Palette *palette);
+	static CL_Palette *get_palette();
+//	static void select_card(CL_DisplayCard *card);
+	static CL_DisplayCard *get_current_card();
+	static void set_videomode(CL_VidMode *mode);
+	static void set_videomode(int width,int height,int bpp,bool fullscreen = true,
+		bool allow_resize = false,bool video_memory = true);
+	static CL_Target *get_target();	
+	static int get_width();
+	static int get_height();
+	static int get_bpp();	
+	static void push_clip_rect();
+	static void push_clip_rect(const CL_ClipRect &rect);
+	static CL_ClipRect get_clip_rect();
+	static void set_clip_rect(const CL_ClipRect &rect);
+	static void pop_clip_rect();
+	static void push_translate_offset();
+	static void push_translate_offset(int x, int y);
+	static int  get_translate_offset_x();
+	static int  get_translate_offset_y();
+	static void set_translate_offset(int x, int y);	
+	static void pop_translate_offset();
+	static void draw_rect(int x1, int y1, int x2, int y2, float r, float g, float b, float a=1.0f);	
+	static void fill_rect(int x1, int y1, int x2, int y2, float r, float g, float b, float a=1.0f);
+	static void draw_line(int x1, int y1, int x2, int y2, float r, float g, float b, float a=1.0f);	
+};
+
+
+class CL_System
+{
+public:
+	static void keep_alive();
+	static void sleep(int millis);
+
+	static unsigned int get_time();
+	static bool keep_alive(CL_EventListener &events, int timeout = -1);
+	static void sleep(int millis);
+	
+//	static void suspend_time();
+//	static void resume_time();
+
+	static bool detect_mmx();
+	static bool detect_3dnow();
+};
+
+
+class CL_Mouse : public CL_InputDevice
+{
+public:
+	virtual ~CL_Mouse();
+
+	static int get_x();
+	static int get_y();
+	static bool left_pressed();
+	static int middle_pressed();
+	static int right_pressed();	
+};
+
+class CL_Keyboard : public CL_InputDevice
+{
+public:
+	virtual ~CL_Keyboard();
+	static int get_keycode(int button_no);
+};
+
+enum
+{
+	CL_KEY_A, CL_KEY_B, CL_KEY_C, CL_KEY_D, CL_KEY_E, CL_KEY_F, CL_KEY_G,
+	CL_KEY_H, CL_KEY_I, CL_KEY_J, CL_KEY_K, CL_KEY_L, CL_KEY_M, CL_KEY_N,
+	CL_KEY_O, CL_KEY_P, CL_KEY_Q, CL_KEY_R, CL_KEY_S, CL_KEY_T, CL_KEY_U,
+	CL_KEY_V, CL_KEY_W, CL_KEY_X, CL_KEY_Y, CL_KEY_Z, CL_KEY_0, CL_KEY_1,
+	CL_KEY_2, CL_KEY_3, CL_KEY_4, CL_KEY_5, CL_KEY_6, CL_KEY_7, CL_KEY_8,
+	CL_KEY_9,
+
+	CL_KEY_F1, CL_KEY_F2, CL_KEY_F3, CL_KEY_F4, CL_KEY_F5, CL_KEY_F6,
+	CL_KEY_F7, CL_KEY_F8, CL_KEY_F9, CL_KEY_F10, CL_KEY_F11, CL_KEY_F12,
+
+	CL_KEY_ESCAPE, CL_KEY_LEFT, CL_KEY_RIGHT, CL_KEY_UP, CL_KEY_DOWN,
+	CL_KEY_LCTRL, CL_KEY_RCTRL, CL_KEY_LSHIFT, CL_KEY_RSHIFT, CL_KEY_ALT,
+	CL_KEY_ALTGR, CL_KEY_TAB, CL_KEY_ENTER, CL_KEY_SPACE, CL_KEY_BACKSPACE,
+	CL_KEY_INSERT, CL_KEY_DELETE, CL_KEY_HOME, CL_KEY_END, CL_KEY_PAGEUP,
+	CL_KEY_PAGEDOWN, CL_KEY_CAPSLOCK, CL_KEY_NUMLOCK, CL_KEY_SCRLOCK,
+	CL_KEY_PRINT, CL_KEY_PAUSE, CL_KEY_KP_DIV, CL_KEY_KP_MULT,
+	CL_KEY_KP_MINUS, CL_KEY_KP_PLUS, CL_KEY_KP_ENTER,
+
+	CL_KEY_NONE_OF_THE_ABOVE,
+	CL_NUM_KEYS
+};
+// Key buttons available on a keyboard.
+
+class CL_Surface
+{
+public:
+	static CL_Surface *load(
+		const char *resource_id,
+		CL_ResourceManager *manager);
+
+	static CL_Surface *create(
+		CL_SurfaceProvider *provider,
+		int delete_provider);
+		
+	static CL_Surface *create_dynamic(
+		CL_SurfaceProvider *provider,
+		bool delete_provider=false);
+
+	virtual ~CL_Surface();
+	
+	virtual void reload();
+	
+	virtual CL_SurfaceProvider *get_provider() const;
+
+//!info: Display functions.
+
+	virtual void put_screen(
+		int x,
+		int y,
+		int spr_no=0,
+		CL_DisplayCard *card=NULL);
+
+	virtual void put_screen(
+		int x,
+		int y,
+		float scale_x,
+		float scale_y,
+		int spr_no=0,
+		CL_DisplayCard *card=NULL);
+
+	virtual void put_screen(
+		int x,
+		int y,
+		int size_x,
+		int size_y,
+		int spr_no=0,
+		CL_DisplayCard *card=NULL);
+
+	virtual void put_target(
+		int x,
+		int y,
+		int spr_no,
+		CL_Target *target);
+
+	virtual unsigned int get_width() const;
+//: Returns the width of the surface
+
+	virtual unsigned int get_height() const;
+//: Returns the height of the surface
+
+	virtual unsigned int get_num_frames() const;
+//: Returns the number of frames/subsprites in the surface
+
+	virtual int is_video(CL_DisplayCard *card = NULL) const ;
+//: returns true if in videomemory
+//: on the specified card (null = current dispcard).
+	
+	virtual int is_loaded(CL_DisplayCard *card = NULL) const;
+//: returns true if loaded in either video- or system-memory
+
+	virtual int convert_video(CL_DisplayCard *card = NULL);
+//: returns true if successfully loaded into videomemory, or already there
+
+	virtual int convert_system(CL_DisplayCard *card = NULL);
+//: convert surface to system memory - never fails! (or serious heap usage!)
+
+	virtual void flush(CL_DisplayCard *card = NULL);
+//: completely flushes surface (removes from video/system-memory)
+};
+
+
+class CL_Target
+{
+public:
+	virtual ~CL_Target();
+
+	virtual int is_video();
+	virtual void lock()=0;
+	virtual void unlock()=0;
+	virtual void *get_data() const=0;
+	virtual unsigned int get_num_frames() const=0;
+	virtual unsigned int get_width() const=0;
+	virtual unsigned int get_height() const=0;
+	virtual unsigned int get_pitch() const=0;
+	virtual unsigned int get_depth();
+	virtual unsigned int get_bytes_per_pixel();
+	virtual int is_indexed() const=0;
+	virtual unsigned int get_red_mask() const=0;
+	virtual unsigned int get_green_mask() const=0;
+	virtual unsigned int get_blue_mask() const=0;
+	virtual unsigned int get_alpha_mask() const=0;
+	virtual CL_Palette *get_palette() const=0;
+	virtual void push_clip_rect();
+	virtual void push_clip_rect(const CL_ClipRect &rect);
+	virtual CL_ClipRect get_clip_rect();
+	virtual void set_clip_rect(const CL_ClipRect &rect);
+	virtual void pop_clip_rect();
+	virtual void push_translate_offset();
+	virtual void push_translate_offset(int x, int y);
+	virtual int  get_translate_offset_x() const;
+	virtual int  get_translate_offset_y() const;
+	virtual void set_translate_offset(int x, int y);
+	virtual void pop_translate_offset();
+	void draw_pixel(int x1, int y1, int color);
+	virtual void draw_pixel(int x, int y, float r, float g, float b, float a = 1.0);
+	virtual void get_pixel(int x, int y, float *r, float *g, float *b, float *a);
+	virtual int get_pixel(int x, int y);
+	void flip_vertical();
+	void flip_horizontal();	
+	void fill_rect(int x1, int y1, int x2, int y2, float r, float g, float b, float a=1.0f);
+	void fill_rect(int x1, int y1, int x2, int y2, float r, float g, float b, float a=1.0f);	
+	void draw_line(int x1, int y1, int x2, int y2, float r, float g, float b, float a=1.0f);
+};
+
+
+class CL_SurfaceProvider : public CL_Target
+{	
+	static CL_SurfaceProvider *load(
+		const char *resource_id,
+		CL_ResourceManager *manager);
+	virtual ~CL_SurfaceProvider();
+
+    virtual int get_translate_x();	
+	virtual int get_translate_y();	
+	virtual int uses_src_colorkey();	
+	virtual unsigned int get_src_colorkey();	
+};
+
+
+
+class CL_Canvas : public CL_SurfaceProvider
+{
+public:
+static CL_Surface *create(
+		int width,
+		int height,
+		int no_sprs = 1,
+		int red_mask   = 0xff000000,
+		int green_mask = 0x00ff0000,
+		int blue_mask  = 0x0000ff00,
+		int alpha_mask = 0x000000ff,
+		int use_transcol = false,
+		unsigned int transcol = 0);
+
+	CL_Canvas(
+		int width,
+		int height,
+		int no_sprs = 1,
+		int red_mask   = 0xff000000,
+		int green_mask = 0x00ff0000,
+		int blue_mask  = 0x0000ff00,
+		int alpha_mask = 0x000000ff,
+		int use_transcol = false,
+		unsigned int transcol = 0);
+	
+	virtual ~CL_Canvas();
+
+	virtual unsigned int get_width();
+	virtual unsigned int get_height();
+	virtual unsigned int get_num_frames();
+	virtual unsigned int get_red_mask();
+	virtual unsigned int get_green_mask();
+	virtual unsigned int get_blue_mask();
+	virtual unsigned int get_alpha_mask();
+	virtual unsigned int get_pitch();
+	virtual int is_indexed();
+	virtual void set_palette(CL_Palette* palette);
+	virtual CL_Palette *get_palette();
+	virtual void set_src_colorkey(unsigned int trans_col);
+	virtual int uses_src_colorkey();
+	virtual unsigned int get_src_colorkey();
+	virtual void *get_data();
+	virtual void lock();
+	virtual void unlock();
+};
+
+class CL_ClipRect
+{
+public:
+	int m_x1;
+	//: Min x-coordinate of the rectangle.
+
+	int m_y1;
+	//: Min y-coordinate of the rectangle.
+
+	int m_x2;
+	//: Max x-coordinate of the rectangle.
+
+	int m_y2;
+	//: Max y-coordinate of the rectangle.
+
+	CL_ClipRect();
+	//: Constructs an uninitialized clip rectangle. (x1, y1) and (x2, y2)
+	//: contain random values, and should be manually initialized before
+	//: usage of the clip rect.
+
+	CL_ClipRect(const CL_ClipRect &rect);
+	//: Copy constructor.
+
+	CL_ClipRect(int x1, int y1, int x2, int y2);
+	//: Constructs a clipping rectangle from (x1,y1) to (x2,y2).
+	//!param: (x1,y1) - Upper left corner of the rectangle.
+	//!param: (x2,y2) - Lower right corner of the rectangle.
+
+	~CL_ClipRect();
+	
+	int test_clipped(const CL_ClipRect &rect);
+	//: Tests if the specified rectangle needs to be clipped with this clip
+	//: rect.
+	//!param: rect - The rectangle to be tested.
+	//!retval: True if the passed rectangle needs to be clipped.
+
+	int test_unclipped(const CL_ClipRect &rect);
+	//: Tests whether the specified rectangle is entirely contained within
+	//: this clip rect.
+	//!param: rect - The rectangle to be tested.
+	//!retval: True if the passed rectangle is contained within this rectangle.
+
+	int test_all_clipped(const CL_ClipRect &rect);
+	//: Tests whether all of the specified rectangle is outside this rectangle.
+	//!param: rect - The rectangle to be tested.
+	//!retval: True if the entire specified rect is outside this rectangle.
+
+	CL_ClipRect clip(const CL_ClipRect &rect);
+	//: Clips the given rectangle and returns the result.
+	//!param: rect - The rectangle to be clipped.
+	//!retval: The clipped rectangle.
+	
+};

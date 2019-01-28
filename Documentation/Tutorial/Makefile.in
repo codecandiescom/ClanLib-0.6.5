@@ -1,0 +1,15 @@
+prefix=@prefix@/share
+PREFIX = $(prefix)/doc/ClanLib-docs-@version_minor@/Docs/Tutorial
+
+all:
+
+install:
+	@install -d $(PREFIX)
+	@install -m 0644 *.html $(PREFIX)
+	@install -m 0644 *.zip $(PREFIX)
+	@install -m 0644 *.gif $(PREFIX)
+
+distclean: clean
+	rm Makefile
+	
+clean:

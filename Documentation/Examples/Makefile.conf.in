@@ -1,0 +1,59 @@
+# $Id: Makefile.conf.in,v 1.5 2001/12/22 06:07:16 plasmoid Exp $
+#
+# This file contains all compiler options used to build ClanLib.
+#
+
+#EXAMPLE_BIN contains list of example binaries to build
+
+#configuration settings
+
+#INCLUDE_DIRS  = -I
+
+COMP_OPTIONS  = -Wall $(INCLUDE_DIRS) -fPIC -DNOCONTROLS -D__int64=int64_t @comp_mode@
+
+LINK_CORE     = @libs@
+
+LINK_COMMAND  = @link_command@
+
+LIB_DIR	      = ../../Libs
+
+LINK_APP      = libclanApp.a
+LINK_CORE     = libclanCore.a
+LINK_DISPLAY  = libclanDisplay.a
+LINK_GL       = libclanGL.a
+LINK_GUI      = libclanGUI.a
+LINK_JPEG     = libclanJPEG.a
+LINK_NET      = libclanNetwork.a
+LINK_PNG      = libclanPNG.a
+LINK_SOUND    = libclanSound.a
+LINK_TTF      = libclanTTF.a
+
+LINK_STATIC   = -lHermes -L/usr/X11R6/lib -lX11 -lXext -lXxf86vm -lz -lpthread
+
+#default targets
+
+all:	message	$(EXAMPLE_BIN)
+
+message:
+	@echo I am going to compile the following binaries for you: $(EXAMPLE_BIN)
+
+clean:
+	@rm -rf Intermediate
+	@rm -f $(EXAMPLE_BIN)
+
+distclean:	clean
+
+Intermediate/%.o : %.cpp
+	@echo "Compiling $<"
+	-@if [ ! -d Intermediate ]; then mkdir Intermediate; fi
+	@$(CXX) $(CXXFLAGS) $(COMP_OPTIONS) -c $< -o $@
+
+Intermediate/%.o : %.c
+	@echo "Compiling $<"
+	-@if [ ! -d Intermediate ]; then mkdir Intermediate; fi
+	@$(CC) $(CFLAGS) $(COMP_OPTIONS) -c $< -o $@
+
+Intermediate/%.o : %.s
+	@echo "Assembling $<"
+	-@if [ ! -d Intermediate ]; then mkdir Intermediate; fi
+	@$(AS) $< -o $@

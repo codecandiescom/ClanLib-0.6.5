@@ -1,0 +1,17 @@
+Libs
+configure
+config.log
+config.cache
+config.status
+Makefile
+Debug
+Release
+ClanLib.dsw
+ClanLib.sln
+configure.exe
+Borland
+*.suo
+*.opt
+*.ncb
+*.plg
+*.ilk

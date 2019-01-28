@@ -1,0 +1,49 @@
+<xml>
+<head>
+<title>ClanLib API - Overview</title>
+<eyecolor>yellow</eyecolor>
+</head>
+<body>
+
+<p>The overview section is a walkthrough of many of ClanLib's components,
+classes and interfaces. It is highly adviceable to read it from the one
+end to the other, if you want to get a full overview of what ClanLib can do
+for you.</p>
+
+<p>The ClanLib game SDK is a library that can ease your game development in many ways.
+ClanLib has APIs for 2D graphics, 3D graphics, sound, network, I/O, input, GUI and
+resource administration. Besides, ClanLib reads a number of common image formats, either 
+natively or through third-party libraries supported by ClanLib. ClanLib provides transparent 
+support for OpenGL, so that you can use native OpenGL commands, while letting ClanLib
+handle the boring parts, such as textures, sound, and all the other things that are required 
+to make a good game besides 3D graphics.</p>
+
+<p>This overview will describe the components of ClanLib one at a time, without focusing too
+much on the actual API (you can use the reference section for that), but instead focusing on
+describing what you can use ClanLib for (and also what you can't use it for).</p>
+
+<p>We will assume you're familiar with C++, and basic game programming terminology. If you're 
+just starting out on making games, perhaps you should first look at a few of the numerous sites
+that describe game programming in general.</p>
+
+<p>If there is something you think is missing out in the documentation,
+don't hesitate to point out what you think could be improved. After all,
+good documentation at least doubles the value of a library.</p>
+
+<p>(This part is still under construction. Documentation volunteers wanted!)</p>
+
+<menu>
+<menuitem "getting_started.html" "Getting started" "The bootstrapping code needed in all ClanLib applications.">
+<menuitem "2dapi.html" "The 2D display component" "2D functionality in ClanLib.">
+<menuitem "loading_graphics.html" "Loading graphics overview" "A description on how to load graphics with ClanLib.">
+<menuitem "resource_overview.html" "Resource overview" "Learn to use the resource system in ClanLib.">
+<menuitem "font_overview.html" "Font overview" "Learn how to create and use fonts in ClanLib.">
+<menuitem "signals.html" "Signals & Slots overview" "Use a powerful component programming mechanism.">
+<menuitem "network_overview.html" "Network overview" "Easy network communication in ClanLib.">
+<menuitem "opengl_overview.html" "OpenGL overview" "Using OpenGL with ClanLib.">
+<menuitem "gui_overview.html" "GUI overview" "Add GUIs easily to your game with ClanLib.">
+<menuitem "engine_design.html" "Game engine design" "Tips on how to make an engine with ClanLib.">
+</menu>
+
+</body>
+</xml>

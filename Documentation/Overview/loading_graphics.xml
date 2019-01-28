@@ -1,0 +1,155 @@
+<xml>
+<head>
+<title>Loading graphics, ClanLib API overview</title>
+</head>
+<body>
+
+<h2>Abstract:</h2>
+
+<p>This document will discuss different ways to load graphics in ClanLib.
+Into surfaces, surface providers and textures. Thereafter it will discuss
+methods to manipulate the images without too much effords.</p>
+
+<p>This document expects that you have already read the
+<a href="2dapi.html">2d API overview</a> document. If you haven't,
+please do that first.</p>
+
+<h3>Loading from files.</h3>
+
+<p>Most ClanLib games will usually use resources to load its graphics, but
+we will start showing how the inner parts of the resource manager loads its
+graphics. Hopefully this should make it more clear how the whole stuff
+works.</p>
+
+<p>To construct a surface or texture in ClanLib, we first need to load it
+into a surface provider. There are surface providers for many common image
+formats, including: CL_PCXProvider, CL_TargaProvider, CL_PNGProvider and
+CL_JPEGProvider.</p>
+
+<p>To use these providers, simple create an instance of it, eg.</p>
+
+<code>
+// Create a provider:
+CL_SurfaceProvider *provider = new CL_TargaProvider("image.tga");
+
+// Load it (true = delete provider when surface is deleted):
+CL_Surface *surface = CL_Surface::create(provider, true);
+
+// Or if you're lazy:
+CL_Surface *surface2 = CL_TargaProvider::create("image.tga");
+</code>
+
+<p>In some cases you may want to alter the image before loading it into a
+surface. It might be that you think it should be cut into subsprites, or
+perhaps some of the colors should be transparent. To do stuff like that,
+ClanLib has a serie of surface providers that alters an other surface
+provider.</p>
+
+<p>One of those providers are called CL_MaskTranscolProvider. It accepts a source
+image (a surface provider), and then a list of pixel values that should be
+made transparent.</p>
+
+<code>
+// First load the original image:
+CL_SurfaceProvider *provider = new CL_TargaProvider("image.tga");
+
+// Now modify it by making black transparent:
+unsigned int color = 0;
+CL_SurfaceProvider *new_provider =
+	new CL_MaskTranscolProvider(
+		provider, // source image
+		true,     // yes, delete source provider when we're deleted.
+		&color,   // pointer to array listening transparency colors
+		1);       // number of elements in the array.
+
+// Load it into a surface:
+CL_Surface *surface = CL_Surface::create(new_provider, true);
+</code>
+
+<p>If you need to create an image from scratch, or want to compose an image
+from multiple other images, ClanLib provides a surface provider called
+CL_Canvas. At construction time, you tell how large and in what format the
+canvas should be in, and then afterwards you can do three things:</p>
+
+<ul>
+<li>Lock the canvas, party on it and then unlock it.</li>
+<li>Draw lines, boxes and other primitive operations.</li>
+<li>Draw surfaces onto the canvas.</li>
+</ul>
+
+<code>
+// Load an image:
+CL_Surface *surf = CL_TargaProvider::create("image.tga");
+
+// Create a canvas, size 320x200, default image format:
+CL_Canvas *canvas = new CL_Canvas(320, 200);
+
+// Draw a line on it:
+canvas->draw_line(0,0,100,100);
+
+// Draw the surface on it:
+surf->put_target(10, 10, canvas);
+
+// Construct a surface from it:
+CL_Surface *canvas_surf = CL_Surface::Create(canvas, true);
+</code>
+
+<p>That should cover the basics of using surface providers.</p>
+
+<h3>Loading from resources</h3>
+
+<p>Although the above loading mechanism in itself is quite simple, it is
+often far better to seperate the description of an image from the actual
+game code. Instead of specifying an image by its filename and type, you use
+an name making more sense for the game code.</p>
+
+<code>
+CL_ResourceManager *resources = new CL_ResourceManager("resources.scr");
+
+CL_Surface *surface = CL_Surface::load("InGame/Level1/background", resources);
+</code>
+
+<p>The resource may be in any format supported by the ClanLib surface
+providers, and the resource description may include transparency, subarrays
+and other fancy stuff. The resources.scr file includes a description of the
+resource that may look like this:</p>
+
+<code>
+section InGame
+{
+	section Level1
+	{
+		background = background1.tga ( // name and the file location
+			type = surface,            // resource is surface
+			tcol = (0, 1, 2, 3));      // four transparent colors.
+
+		walking_man = man.pcx (type = surface);
+	}
+}
+</code>
+
+<p>As you can probably see, the game code no longer needs to know how the
+resource is physically loaded. And it is possible to change the image
+without recompiling the application.</p>
+
+<p>The resource manager may also be attached to something else than physical
+files, it may be loading them from a network server, or a datafile. The nice
+thing is that the game code doesn't know, and doesn't need to either.</p>
+
+<p>If you want to load the image resource into a texture or just into
+surface provider, that is also possible:</p>
+
+<code>
+CL_Texture *texture =
+	CL_Texture::load("InGame/Level1/background", resources);
+
+CL_SurfaceProvider *provider =
+	CL_SurfaceProvider::load("InGame/Level1/background", resources);
+
+</code>
+
+<p>If you want more information about resources, have a look at the <a
+href="resource_overview.html">resource overview</a>.</p>
+
+</body>
+</xml>

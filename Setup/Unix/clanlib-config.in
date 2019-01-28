@@ -1,0 +1,24 @@
+#!/bin/sh
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+if test $# -eq 0; then
+	echo "Usage: clanlib-config [--version] [--cflags] [--libs]"
+	exit 1
+fi
+
+case $1 in
+  --version)
+    echo @version_minor@
+    ;;
+  --cflags)
+    includes=-I${includedir} 
+    echo ${includes} @comp_mode@
+    ;;     
+  --libs)
+    echo -L${libdir} -lclanCore -lclanApp
+    ;;
+esac

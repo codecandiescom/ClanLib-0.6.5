@@ -1,0 +1,8 @@
+button my_button
+{
+	text = "Button";
+	x = 160;
+	y = 100;
+	width = 319;
+	height = 199;
+}

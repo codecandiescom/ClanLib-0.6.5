@@ -1,0 +1,106 @@
+ClanGUI
+-------
+The GUI is work-in-progress. It means we are currently lacking some
+components, and some components are unfinished. Some parts of the GUI API
+is not quite done, and changes will occur. But it has become very stable,
+and should be by far good enough to start play around with in your projects.
+
+Contributions are as always welcome! Help us create a good API, create
+new components, create new styles, create cool games and apps using the GUI!
+
+We will write proper overviews in the Documentation folder later on,
+describing in detail how the GUI works, how to use it, how to create new
+themes etc.
+
+Don't hesitate asking us questions regarding the GUI; we appreciate
+feedback and try to help as good and fast as we can.
+
+--
+Enjoy,
+The ClanLib development team
+
+----
+
+The following section is mostly for internal use for the ClanLib GUI developers.
+It will contain known bugs, ideas and notes, status for the components etc.
+
+GUI Bugs:
+---------
+- When creating new GUIManagers, it has to create a state of the previous, so when it gives control
+  to the previous manager, it gets for instance mouse_up signalled correctly.
+- GUIDynamic: Select "View 12" then "View 5". Quit. Crashes in listbox destructor.
+- Scrollbars: Move mouse outside area, and then within, repeat a couple of times - the position which the bar moves
+  is changed. Probably some broken delta values.
+- CL_Menu, CL_PopupMenu, CL_ComboBox is broken.
+- CL_TreeView:
+  - Make CL_TreeView_Node stylable ?
+  - Add icon-support to TreeView
+  - Stop drawing when out of component-range
+- CL_ListBox:
+  - Stop drawing when out of component-range
+
+GUI Memory-leaks:
+-----------------
+- The following classes might still have memory-leaks:
+  - Component
+  - Component_Generic
+  - Component_Manager
+  - Component_Manager_Generic
+  - Component_Move_Handler
+  - Component_Resize_Handler
+  - Component_Tokenizer
+  - ComponentFile_Preprocess
+
+GUI Ideas:
+----------
+  - Add dockable windows?
+  - Add toolbar?
+  - Keyboard control sucks
+  - Rewrite hierarchy handling; enabling treeviews, menues etc.
+    (This might also affect the .gui format)
+  - Add minimum/maximum sizes to components
+  - Improve the LayoutManager: (The Java way - generic, good, but alot of work)
+    {
+	BorderLayout layout = new BorderLayout;
+	setLayerManager(layout);
+
+	toolbar = new ToolbarWidget(bla bla bla...);
+	layout.setPosition("north", toolbar);
+
+	statusbar = new Status....
+	layout.setPosition("south", statusbar);
+
+	treeview = new TreeView...
+	layout.setPosition("west", treeview);
+
+	listview = new ListView...
+	layout.setPosition("center", listview);
+    }
+
+GUI status:
+-----------
+
+             API   Resizing   Autosize   GUIFile  NoSizeConstr Implemented
+Button        X      ?          ?          ?          Yes      ?
+CheckBox      X      ?          ?          ?          Yes      Yes
+ComboBox      .      ?          ?          ?          Yes      Currently untested
+Frame         .      ?          ?          No         Yes      
+Image         .      ?          ?          No         Yes      
+InputBox      X      ?          ?          ?          Yes      Missing mouse-selection, bad scrolling
+Label         X      ?          ?          ?          Yes      Missing alignment
+ListBox       X      ?          ?          ?          Yes      Some unimpl. func.
+RadioButton   X      ?          ?          ?          Yes
+ProgressBar   X      ?          ?          ?          Yes      
+ScrollBar     x      ?          ?          ?          Yes      Missing fixed-length sliders
+TreeView      x      ?          ?          ?          Yes      Some unimpl. func.
+Window        .      No         No         ?          Yes      ?
+	
+FileDialog    X      No         ?          ?       
+MessageBox    X      No         ?          ?       
+
+API = API complete (X=complete, x=mostly complete, .=under construction)
+Resizing = Handles resize of component
+Autosize = Supports autosize of component
+GUIFile = GUIFile-support for all attributes
+NoSizeConstr = Constructor without size-requirement exists
+Implemented = All functions implemented and other comments

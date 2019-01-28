@@ -1,0 +1,29 @@
+#
+# Makefile data for clanApp library.
+#
+
+clanApp: Libs/libclanApp.so Libs/libclanApp.a
+
+installApp: clanApp
+	@for i in `find Sources/API/Application -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Application -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/application.h $(INC_PREFIX)/ClanLib/application.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanApp.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanApp.a $(LIB_PREFIX)
+	@ln -s -f libclanApp.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanApp.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanApp.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanApp.so
+
+
+OBJF_LIB_App = Libs/Intermediate/clanapp.o
+
+Libs/libclanApp.so: Libs/libclanCore.so $(OBJF_LIB_App)
+	@echo "Building Libs/libclanApp.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanApp.so.$(D_VERSION_MAJOR) -o Libs/libclanApp.so.$(D_VERSION_MINOR) $(OBJF_LIB_App) -L Libs -lclanCore
+	@ln -s -f libclanApp.so.$(D_VERSION_MINOR) Libs/libclanApp.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanApp.so.$(D_VERSION_MAJOR) Libs/libclanApp.so
+
+Libs/libclanApp.a: $(OBJF_LIB_App)
+	@echo "Building Libs/libclanApp.a"
+	-@if [ -e Libs/libclanApp.a ]; then rm -f Libs/libclanApp.a; fi
+	@ar qc Libs/libclanApp.a $(OBJF_LIB_App)

@@ -1,0 +1,31 @@
+#
+# Makefile data for clanJPEG library.
+#
+
+clanJPEG: Libs/libclanJPEG.so Libs/libclanJPEG.a
+
+installJPEG: clanJPEG
+	@for i in `find Sources/API/JPEG -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/JPEG -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/jpeg.h $(INC_PREFIX)/ClanLib/jpeg.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanJPEG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanJPEG.a $(LIB_PREFIX)
+	@ln -s -f libclanJPEG.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanJPEG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanJPEG.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanJPEG.so
+
+
+OBJF_LIB_JPEG = \
+	Libs/Intermediate/provider_jpeg.o \
+	Libs/Intermediate/provider_jpeg_generic.o
+
+Libs/libclanJPEG.so: Libs/libclanCore.so $(OBJF_LIB_JPEG)
+	@echo "Building Libs/libclanJPEG.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanJPEG.so.$(D_VERSION_MAJOR) -o Libs/libclanJPEG.so.$(D_VERSION_MINOR) $(OBJF_LIB_JPEG) -L Libs -lclanCore -ljpeg
+	@ln -s -f libclanJPEG.so.$(D_VERSION_MINOR) Libs/libclanJPEG.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanJPEG.so.$(D_VERSION_MAJOR) Libs/libclanJPEG.so
+
+Libs/libclanJPEG.a: $(OBJF_LIB_JPEG)
+	@echo "Building Libs/libclanJPEG.a"
+	-@if [ -e Libs/libclanJPEG.a ]; then rm -f Libs/libclanJPEG.a; fi
+	@ar qc Libs/libclanJPEG.a $(OBJF_LIB_JPEG)

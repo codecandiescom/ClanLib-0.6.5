@@ -1,0 +1,30 @@
+#
+# Makefile data for clanVorbis library.
+#
+
+clanVorbis: Libs/libclanVorbis.so Libs/libclanVorbis.a
+
+installVorbis: clanVorbis
+	@for i in `find Sources/API/Vorbis -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Vorbis -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/vorbis.h $(INC_PREFIX)/ClanLib/vorbis.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanVorbis.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanVorbis.a $(LIB_PREFIX)
+	@ln -s -f libclanVorbis.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanVorbis.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanVorbis.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanVorbis.so
+
+OBJF_LIB_VORBIS = \
+	Libs/Intermediate/vorbis_soundprovider_generic.o \
+	Libs/Intermediate/vorbis_setup.o
+
+Libs/libclanVorbis.so: Libs/libclanCore.so $(OBJF_LIB_VORBIS)
+	@echo "Building Libs/libclanVorbis.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanVorbis.so.$(D_VERSION_MAJOR) -o Libs/libclanVorbis.so.$(D_VERSION_MINOR) $(OBJF_LIB_VORBIS) -L Libs -lclanCore -lvorbis
+	@ln -s -f libclanVorbis.so.$(D_VERSION_MINOR) Libs/libclanVorbis.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanVorbis.so.$(D_VERSION_MAJOR) Libs/libclanVorbis.so	
+
+Libs/libclanVorbis.a: $(OBJF_LIB_VORBIS)
+	@echo "Building Libs/libclanVorbis.a"
+	-@if [ -e Libs/libclanVorbis.a ]; then rm -f Libs/libclanVorbis.a; fi
+	@ar qc Libs/libclanVorbis.a $(OBJF_LIB_VORBIS)

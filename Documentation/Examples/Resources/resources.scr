@@ -1,0 +1,39 @@
+section	Configuration
+{
+	name	=	"The name of the game"	(type=string);
+	width	=	640	(type=integer);
+	height	=	480	(type=integer);
+}
+
+section Classes
+{
+	Mage	=	(
+					strength = 100, 
+					magic=100,
+					
+					type=UClass
+				);
+	Thief	=	(
+					strength = 200, 
+					magic=50, 
+					
+					type=UClass
+				);
+}
+
+section Fonts
+{
+	fnt_clansoft = resources/clanfont.pcx (
+		type=font,
+		x=129,
+		y=209,
+		tcol=0,
+		spacelen=6,
+		letters=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+	);
+}
+
+section Gfx
+{
+	logo = resources/logo.tga (type=surface);
+}

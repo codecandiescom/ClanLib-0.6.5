@@ -1,0 +1,61 @@
+# Makefile data for clanSound library.
+#
+
+clanSound: Libs/libclanSound.so Libs/libclanSound.a
+
+installSound: clanSound
+	@for i in `find Sources/API/Sound -type d | grep -v CVS | sed "s/Sources\/API\///;"`; do install -d $(INC_PREFIX)/ClanLib/$$i; done
+	@for i in `find Sources/API/Sound -type f | grep -v CVS | sed "s/Sources\/API\///;"`; do install -m 0644 Sources/API/$$i $(INC_PREFIX)/ClanLib/$$i; done
+	@install -m 0644 Sources/API/sound.h $(INC_PREFIX)/ClanLib/sound.h
+	@install -d $(LIB_PREFIX)
+	@install Libs/libclanSound.so.$(D_VERSION_MINOR) $(LIB_PREFIX)
+	@install Libs/libclanSound.a $(LIB_PREFIX)
+	@ln -s -f libclanSound.so.$(D_VERSION_MINOR) $(LIB_PREFIX)/libclanSound.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanSound.so.$(D_VERSION_MAJOR) $(LIB_PREFIX)/libclanSound.so
+
+OBJF_SOUND_GENERIC = \
+	Libs/Intermediate/sound.o \
+	Libs/Intermediate/soundbuffer.o \
+	Libs/Intermediate/setupsound_generic.o \
+	Libs/Intermediate/soundbuffer_generic.o \
+	Libs/Intermediate/soundbuffer_static.o \
+	Libs/Intermediate/soundbuffer_stream.o \
+	Libs/Intermediate/soundcard_generic.o \
+	Libs/Intermediate/soundbuffer_session.o \
+	Libs/Intermediate/cardsession_manager.o \
+	Libs/Intermediate/cardsoundbuffer_playback.o \
+	Libs/Intermediate/resourcetype_sample.o \
+	Libs/Intermediate/static_provider_wave.o \
+	Libs/Intermediate/stream_provider_wave.o \
+	Libs/Intermediate/stream_provider_raw.o \
+	Libs/Intermediate/echofilter_generic.o \
+	Libs/Intermediate/inverse_echofilter_generic.o \
+	Libs/Intermediate/fadefilter_generic.o \
+	Libs/Intermediate/setupsound_unix.o
+
+OBJF_SOUND_CLANSOUND = \
+	Libs/Intermediate/implementation_clansound.o \
+	Libs/Intermediate/soundbuffer_static_clan.o \
+	Libs/Intermediate/playback_static.o \
+	Libs/Intermediate/playback_stream.o \
+	Libs/Intermediate/soundcard_clan.o \
+	Libs/Intermediate/cardplayback_clan.o \
+	Libs/Intermediate/mixer.o \
+	Libs/Intermediate/oss.o \
+	Libs/Intermediate/cdaudio_linux.o
+
+OBJF_SOUND_INTEL_ASM = \
+	Libs/Intermediate/mixer_asm.o
+
+OBJF_SOUND_ALL = $(OBJF_SOUND_GENERIC) $(OBJF_SOUND_CLANSOUND) @sound_assembly@
+
+Libs/libclanSound.so: Libs/libclanCore.so $(OBJF_SOUND_ALL)
+	@echo "Building Libs/libclanSound.so"
+	@$(LINK_COMMAND) -Wl,-soname=libclanSound.so.$(D_VERSION_MAJOR) -o Libs/libclanSound.so.$(D_VERSION_MINOR) $(OBJF_SOUND_ALL) -L Libs -lclanCore
+	@ln -s -f libclanSound.so.$(D_VERSION_MINOR) Libs/libclanSound.so.$(D_VERSION_MAJOR)
+	@ln -s -f libclanSound.so.$(D_VERSION_MAJOR) Libs/libclanSound.so
+
+Libs/libclanSound.a: $(OBJF_SOUND_ALL)
+	@echo "Building Libs/libclanSound.a"
+	-@if [ -e Libs/libclanSound.a ]; then rm -f Libs/libclanSound.a; fi
+	@ar qc Libs/libclanSound.a $(OBJF_SOUND_ALL)

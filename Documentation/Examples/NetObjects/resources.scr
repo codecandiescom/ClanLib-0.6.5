@@ -1,0 +1,120 @@
+section Sprites
+{
+	section Ship
+	{
+		frame1 = Gfx/ship1.png (type=surface);
+		frame2 = Gfx/ship2.png (type=surface);
+		frame3 = Gfx/ship3.png (type=surface);
+	}
+
+	section Wormhole1
+	{
+		frame1 = Gfx/wormhole1.tga (type=surface);
+	}
+	section Wormhole2
+	{
+		frame1 = Gfx/wormhole2.tga (type=surface);
+	}
+}
+
+section Backgrounds
+{
+	nebula1 = Gfx/nebula.jpg (type=surface);
+}
+
+section Titles
+{
+	mainmenu = Gfx/title_mainmenu.tga (type=surface);
+	options = Gfx/title_options.tga (type=surface);
+	lobby = Gfx/title_lobby.tga (type=surface);
+}
+
+section Intro
+{
+	font = Gfx/green_font.tga(
+		type=font,
+		trans_limit=0.00,
+		subtract_width=5,
+		spacelen=10,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+
+	background = Gfx/intro.jpg (type=surface);
+
+	section Sounds
+	{
+		write = Sound/write.wav(type=sample);
+		background = Sound/space.wav(type=sample);
+	}
+}
+
+section Button
+{
+	font = Gfx/small_font.tga(
+		type=font,
+		trans_limit=0.05,
+		subtract_width=0,
+		spacelen=6,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZÊ∆¯ÿÂ≈0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+
+	up_left = Gfx/buttonup_left.tga (type = surface);
+	up_center = Gfx/buttonup_center.tga (type = surface);
+	up_right = Gfx/buttonup_right.tga (type = surface);
+
+	down_left = Gfx/buttondown_left.tga (type = surface);
+	down_center = Gfx/buttondown_center.tga (type = surface);
+	down_right = Gfx/buttondown_right.tga (type = surface);
+}
+
+section CheckBox
+{
+	font = Gfx/small_font.tga(
+		type=font,
+		trans_limit=0.05,
+		subtract_width=0,
+		spacelen=6,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZÊ∆¯ÿÂ≈0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+
+	left = Gfx/buttonup_left.tga (type = surface);
+	right = Gfx/buttonup_right.tga (type = surface);
+	ticker = Gfx/button_ticker.tga (type = surface);
+}
+
+section Label
+{
+	font = Gfx/small_font.tga(
+		type=font,
+		trans_limit=0.05,
+		subtract_width=0,
+		spacelen=6,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZÊ∆¯ÿÂ≈0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+}
+
+section InputBox
+{
+	font = Gfx/small_font.tga(
+		type=font,
+		trans_limit=0.05,
+		subtract_width=0,
+		spacelen=6,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZÊ∆¯ÿÂ≈0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+
+	left = Gfx/input_left.tga (type = surface);
+	center = Gfx/input_center.tga (type = surface);
+	right = Gfx/input_right.tga (type = surface);
+}
+
+section ListBox
+{
+	font = Gfx/small_font.tga(
+		type=font,
+		trans_limit=0.05,
+		subtract_width=0,
+		spacelen=6,
+		letters="aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZÊ∆¯ÿÂ≈0123456789.,:;|!""@#$%&/\{}[]()<>=+-_?'`~^*"
+	);
+}

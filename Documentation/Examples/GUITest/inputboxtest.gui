@@ -1,0 +1,167 @@
+frame my_frame
+{
+	x = 100;
+	y = 50;
+	width = 500;
+	height = 200;
+
+	label title
+	{
+		x = 5;
+		y = 5;
+		width = 500;
+		height = 16;
+		text = "Inputbox test. Copyright (c)2000 by the wannabe!"; 
+	}
+
+	label label_combobox_animals
+	{
+		x = 25;
+		y = 34;
+		width = 200;
+		height = 16;
+		text = "Listbox w/animal"; 
+	}
+
+	label label_combobox_numbers
+	{
+		x = 230;
+		y = 34;
+		width = 200;
+		height = 16;
+		text = "Listbox w/numbers";
+	}
+
+	label label_inputbox
+	{
+		x = 25;
+		y = 84;
+		width = 200;
+		height = 16;
+		text = "Inputbox";
+	}
+
+	label fps
+	{
+		x = 25;
+		y = 160;
+		text = "fps: ";
+		width = 100;
+		height = 20;
+	}
+
+	inputbox my_inputbox
+	{
+		x = 25;
+		y = 100;
+		width = 300;
+		text = "tekst";
+	}
+
+	scrollbar my_ver_scrollbar
+	{
+		x = 484;
+		y = 0;
+		height = 184;
+		orientation = ver;
+		min = 10;
+		max = 100;
+	}
+	scrollbar my_hor_scrollbar
+	{
+		x = 0;
+		y = 184;
+		width = 484;
+		orientation = hor;
+	}
+
+	button my_button
+	{
+		text = "Button";
+		x = 25;
+		y = 130;
+		width = 100;
+		height = 20;
+	}
+
+	checkbox my_checkbox
+	{
+		x = 300;
+		y = 150;
+	}
+}
+
+listbox my_listbox
+{
+	x = 40;
+	y = 40;
+	width = 200;
+	height = 400;
+	
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+	item = muh;
+	item = ha;
+	item = "dette er en listbox";
+	item = "ja det er så";
+	item = dumdidum;
+	item = "option 48";
+}

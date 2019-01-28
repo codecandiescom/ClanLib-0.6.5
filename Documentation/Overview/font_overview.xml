@@ -1,0 +1,143 @@
+<xml>
+<head>
+<title>Creating and using fonts, ClanLib API overview</title>
+</head>
+<body>
+
+<h2>Abstract:</h2>
+
+<p>ClanLib makes it possible to create your own font in an image file (like TGA, PNG or PCX)
+or use existing TTF fonts.</p>
+
+<p>This document will demonstrate two different ways to create fonts in ClanLib,
+and show how to use those in your application. It will also briefly show
+how to use TTF fonts directly using ClanTTF.</p>
+
+<h3>Creating fonts</h3>
+
+<p>You can make your own font by drawing all the letters and numbers in an image file.</p>
+
+<p>There are two types of font creation in ClanLib, the <b>old</b> (hard) and <b>new</b>
+(easy) way. In the old way you had to use specific palette colors to seperate the letters,
+while you can use the alpha/transparency in the new way.</p>
+
+<h4>The new way</h4>
+<p>To make a font in an image file in the new way, you have to use an image-format which
+supports alpha/transparency. We suggest that you use TGA or PNG. An image with
+alpha/transparency uses 32 bit to store each pixel. The 24 bit specifies the RGB
+color and the rest (8 bit) specifies the alpha/tranparency.</p>
+
+<p>The letters in the image-file are separated by one or several vertical lines with
+full transparency (that is pixels with an alpha below the trans_limit). The font cutter
+will then use these transparent lines to cut out the letters, telling it where each
+letter starts and stops. Note that all letters must be placed beside eachother in one
+row; you can't place letters below others.</p>
+
+<p>Read <a href="font_creation_new.html">this</a> for a tutorial on how to create
+a font using this method.</p>
+
+<p>When a font is loaded, it is analyzed. If there is no alpha in the image,
+despite that it has an alpha channel, it stores it as a colorkey surface (palette-color
+seperated font). So basically, if you have a target image, where only alpha
+is either 100% on or off, the image will be just as fast as an image that never
+had an alpha channel. If you use variable alpha-values, the font will be blitted
+using these values (which is slower, but much nicer than a colorkey surface).</p>
+
+<h4>The old way</h4>
+<p>To make a font in an image file in the old way, you have to use an 8-bit format and
+save your image as 256 index-coloured; the PCX format is perfect for this.</p>
+
+<p>The letters are seperated by straight lines, which are drawn with the last 3 colors of the
+256 color-palette. Color number 254 seperates the letters vertically, number 255 separates
+the lines and color 253 marks the end of the line.</p>
+
+<p>Read <a href="font_creation_old.html">this</a> for a tutorial on how to create
+a font using this method.</p>
+
+<h3>Using fonts</h3>
+<p>The resource type can look like this:</p>
+
+<code>
+// New way:
+font = font.tga(
+		type=font,
+		trans_limit=0.05,
+		x=0, y=0,
+		subtract_width=0,
+		spacelen=4,
+		letters="!'#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_'abcdefghijklmnopqrstuvwxyz{|}~");
+
+// Old way:
+font = font.pcx(
+		type=font,
+		x=1, y=1,
+		tcol=0,
+		spacelen=6,
+		letters="abcABC12345.,""(){}" );
+</code>
+
+<p>Common options for the new and old method:</p>
+<ul>
+<li>"type=font" : tells the resource system we're defining a font.</li>
+<li>"x=0, y=0" : defines the top left pixel of your font.</li>
+<li>"spacelen=6" : any letter which you have not defined will be replaced by a blank space of "spacelen" pixels.</li>
+<li>"letters="ABCabc.,""()." : tells the datafile compiler which letters you have defined. 
+  This is an important feature, since you don't have to redefine 224 characters if you only need 40 of them.
+  To define a " just type it two times.</li>
+</ul>
+
+<p>Options for the new method:</p>
+<ul>
+<li>"trans_limit=0.05": the amount of the alpha amount allowed where it still considers the pixel to be transparent.</li>
+<li>"subtract_width=0": is the kerning, if it is eg. 5, then 5 pixels will be subtracted from each letter's width.</li>
+</ul>
+
+<p>Options for the old method:</p>
+<ul>
+<li>"tcol=0" : color for transparency.</li>
+</ul>
+
+<p>If you want more information about resources, have a look at
+the <a href="resource_overview.html">resource overview</a>.</p>
+
+<h3>Loading the fonts at runtime</h2>
+
+<p>To load the font in your program, you can use the following C++ code:</p>
+
+<code> 
+  CL_ResourceManager *manager = new CL_ResourceManager("myresources.scr", true); 
+  CL_Font *font = new CL_Font("font", manager);
+</code>
+
+<h3>Using TTF fonts with ClanTTF</h3>
+
+<code>
+#include <ClanLib/ttf.h>
+
+main(...)
+{
+	...
+	// Setting up ClanLib
+	CL_TTFSetup::init();
+	...
+	CL_Font *font = new CL_Font("my_font", resources);
+	...
+	// End of program, close down
+	CL_TTFSetup::deinit();
+}
+</code>
+
+<p>In the resource-file, type:</p>
+<code>
+	myfont = font.ttf (type=TTF);
+</code>
+
+<p>Where myfont is the name you would use in the program and font.ttf
+is the file name of the font. For an example of how to do this checkout
+the Examples/TTF directory.</p>
+
+<p>ClanTTF is still under development, and you might experience some problems
+with it. This will be better in upcoming releases.</p>
+
+</body>
+</xml>

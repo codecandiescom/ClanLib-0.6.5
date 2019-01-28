@@ -1,0 +1,145 @@
+<xml>
+<head>
+<title>Using OpenGL, ClanLib API overview</title>
+</head>
+<body>
+
+<h2>Abstract:</h2>
+
+<p>This document explains how to use OpenGL in ClanLib.</p>
+
+<h3>Why use ClanLib for OpenGL?</h3>
+
+<p>OpenGL is already a crossplatform library - most distroes even include
+GLUT, which removes the platform dependant initialization. Why use ClanLib
+then?</p>
+
+<p>The answer is that ClanLib provides much more than simply its display
+support. You will get access to the 2D functionality, crossplatform sound,
+networking and a nice framework for it all.</p>
+
+<h3>Initializing clanGL</h3>
+
+<p>In order to use <a href="http://opengl.org">OpenGL</a> in ClanLib, you
+will have to link against clanGL, and initialize it. You do this by calling
+the functions in <codelink>CL_SetupGL</codelink>, accordingly to the system
+explained in the <a href="getting_started.html">Getting Started</a>
+document:</p>
+
+<code>
+#include <ClanLib/application.h>
+#include <ClanLib/core.h>
+#include <ClanLib/display.h>
+#include <ClanLib/gl.h>
+
+class MyApp : public CL_ClanApplication
+{
+public:
+	virtual int main(int argc, char **argv)
+	{
+		CL_SetupCore::init();
+		CL_SetupGL::init();
+
+		// Select the display target
+		CL_SetupDisplay::init();
+
+		// Select GLX/ WGL attributes (optional)
+		CL_OpenGL::set_buffer_size(16);
+		CL_OpenGL::set_depth_size(16);
+
+		// Select the video mode
+		CL_Display::set_videomode(640, 480, 16, false);
+		
+		while (!CL_Keyboard::get_keycode(CL_KEY_ESCAPE))
+		{
+			// Do CL_Display or OpenGL calls here:
+			CL_Display::clear_display();
+
+			glBegin(GL_TRIANGLES);
+			// ...
+			glEnd();
+
+			// Show the frame:
+			CL_Display::flip_display();
+			
+			// Update input and other stuff:
+			CL_System::keep_alive();
+		}
+	
+		CL_SetupGL::deinit();
+		CL_SetupDisplay::deinit();
+		CL_SetupCore::deinit();
+
+		return 0;
+	}
+} my_app;
+</code>
+
+<p>The important thing to note here is, that the OpenGL context is first
+created and select when a video mode is set. So do not make calls to OpenGL
+before that.</p>
+
+<h3>ClanLib 2D and OpenGL</h3>
+
+<p>You can use the normal 2D gfx operations that ClanLib offers together
+with OpenGL. Note that ClanLib uses OpenGL to emulate them, so you cannot
+use them between glBegin()/glEnd() calls.</p>
+
+<p>If you are going to do a lot of 2D calls after each other, you should use
+the <codelink>CL_OpenGL</codelink>::begin_2d() and
+<codelink>CL_OpenGL</codelink>::end_2d() functions. Those will inform
+ClanLib that OpenGL won't be touched, and that it can leave OpenGL in a
+state suitable for 2D. If you do not call those, ClanLib will save the
+current state of OpenGL, and restore it again, between each 2D
+operation.</p>
+
+<h3>The CL_Texture class</h3>
+
+<p>ClanLib can help you with loading textures into an OpenGL texture. The
+class <codelink>CL_Texture</codelink> creates a texture handle and uses a
+surface provider to load the texture:</p>
+
+<code>
+CL_Texture *texture1 = CL_Texture::load("image", resources);
+
+CL_Texture *texture2 = CL_Texture::create(
+	new CL_TargaProvider("texture.tga", NULL),
+	true);
+</code>
+
+<p>To use the texture, you will have to bind it. To do that, call
+CL_Texture::bind().</p>
+
+<p>If the surface provider contain sub frames, each of those frames will
+become a texture. You will have to specify to CL_Texture::bind() which sub
+frame you want to use.</p>
+
+<code>
+texture1->bind();
+
+glBegin(GL_QUADS);
+glColor3f(1.0f, 1.0f, 1.0f);
+
+glTexCoord2f(0.0f, 0.0f);
+glVertex3f(10,10,10);
+
+glTexCoord2f(1.0f, 0.0f);
+glVertex3f(20,10,10);
+
+glTexCoord2f(1.0f, 1.0f);
+glVertex3f(20,10,20);
+
+glTexCoord2f(0.0f, 1.0f);
+glVertex3f(10,10,20);
+
+glEnd();
+</code>
+
+<h3>The future</h3>
+
+<p>At the moment, this is all ClanLib will help you with, if you're going to
+use OpenGL. For the rest, you will either have to do it yourself, or go
+hunting on the 'net for a library that can help you.</p>
+
+</body>
+</xml>
